@@ -18,7 +18,10 @@ def extract_urls_from_db() -> list[str]:
 
 def get_html_from_url(web_page: str) -> bytes:
     """ Gets the html content from a given URL"""
-    html = requests.get(web_page)
+    try:
+        html = requests.get(web_page)
+    except requests.exceptions.MissingSchema as e:
+        return "That's not a valid URL."
     return html.content
 
 

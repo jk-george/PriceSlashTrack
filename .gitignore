@@ -1,2 +1,9 @@
 .venv
+.env
+.DS_Store
+
+.tfvars
+.terraform
 *.tfvars
+*.terraform.*
+*.tfstate*

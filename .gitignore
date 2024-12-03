@@ -25,7 +25,8 @@ node_modules/
 .LSOverride
 
 
-
+__pycache__
+.pytest_cache
 
 .venv
 .env

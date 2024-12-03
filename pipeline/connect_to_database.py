@@ -1,7 +1,17 @@
+"""Establishes connection to RDS database"""
+from os import environ
+import logging
 import psycopg2
 import psycopg2.extras
-from os import environ
 from dotenv import load_dotenv
+
+
+def configure_logging() -> None:
+    """Configure logging"""
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
 
 
 def get_connection():
@@ -14,6 +24,7 @@ def get_connection():
             port=environ["DB_PORT"],
             database=environ["DB_NAME"]
         )
+        print("Connected to RDS database")
         return connection
     except psycopg2.Error as e:
         print("Error connecting to the database:", e)

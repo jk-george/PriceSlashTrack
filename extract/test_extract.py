@@ -1,6 +1,6 @@
-from extract import scrape_from_html, get_html_from_url, get_website_from_url
 import pytest
-from unittest.mock import MagicMock
+
+from extract import scrape_from_html, get_html_from_url, get_website_from_url
 
 
 def test_website_finder_finds_com_websites():

@@ -1,10 +1,11 @@
-INSERT INTO users (first_name, last_name, email_address)
-VALUES 
-    ('Alice', 'Johnson', 'alice.johnson@example.com'),
-    ('Bob', 'Smith', 'bob.smith@example.com'),
-    ('Charlie', 'Brown', 'charlie.brown@example.com'),
-    ('Diana', 'Prince', 'diana.prince@example.com'),
-    ('Eve', 'Adams', 'eve.adams@example.com');
+INSERT INTO users (first_name, last_name, email_address, password)
+VALUES
+    ('John', 'Doe', 'john.doe@example.com', 'password123'),
+    ('Jane', 'Smith', 'jane.smith@example.com', 'securepass'),
+    ('Alice', 'Johnson', 'alice.j@example.com', 'mypassword'),
+    ('Bob', 'Williams', 'bob.w@example.com', 'pass1234'),
+    ('John', 'Smith', 'john_s@example.com', 'abcdef');
+
 
 INSERT INTO website (website_name)
 VALUES 
@@ -22,7 +23,7 @@ VALUES
     ('Tablet', 'https://www.walmart.com/tablet', 4, 299.99),
     ('Smartwatch', 'https://www.target.com/smartwatch', 5, 149.99);
 
-INSERT INTO price (price, product_id, timestamp)
+INSERT INTO price_changes (price, product_id, timestamp)
 VALUES 
     (949.99, 1, '2024-12-01 10:00:00'),
     (759.99, 2, '2024-12-01 11:00:00'),

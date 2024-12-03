@@ -28,7 +28,7 @@ CREATE TABLE product (
     FOREIGN KEY (website_id) REFERENCES website(website_id)
 );
 
-CREATE TABLE price (
+CREATE TABLE price_changes (
     price_id INT GENERATED ALWAYS AS IDENTITY,
     price FLOAT NOT NULL,
     product_id INT NOT NULL,

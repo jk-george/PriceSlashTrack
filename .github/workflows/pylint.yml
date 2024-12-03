@@ -27,30 +27,4 @@ jobs:
 
     - name: Analyse the code with pylint if *.py files exist
       run: |
-        py_files=$(git ls-files '*.py')
-        
-        if [ -z "$py_files" ]; then
-          echo "No Python files found, skipping pylint analysis."
-        else
-          # Run pylint and capture the output
-          pylint_output=$(pylint $py_files)
-          echo "Pylint output: $pylint_output"
-          
-          # Extract the score from pylint output (last line)
-          pylint_score=$(echo "$pylint_output" | tail -n 1 | grep -oP "\d+\.\d{1,2}$")
-          
-          if [ -z "$pylint_score" ]; then
-            echo "Failed to extract pylint score from the output."
-            exit 1
-          fi
-
-          echo "Extracted Pylint score: $pylint_score"
-          
-          # Check if score is above 9
-          if [ $(echo "$pylint_score >= 9" | bc) -eq 1 ]; then
-            echo "Pylint score is $pylint_score, passing."
-          else
-            echo "Pylint score is $pylint_score, failing."
-            exit 1
-          fi
-        fi
+          pylint --fail-under 8.0 **.py

@@ -20,13 +20,26 @@ def get_html_from_url(web_page: str) -> bytes:
     """ Gets the html content from a given URL"""
     try:
         html = requests.get(web_page)
-    except requests.exceptions.MissingSchema as e:
-        return "That's not a valid URL."
+    except requests.exceptions.MissingSchema:
+        return "That URL does not exist."
+    except requests.exceptions.ConnectionError:
+        return "That URL does not exist."
+    if html.status_code > 299 or html.status_code < 200:
+        return "That URL does not exist."
     return html.content
 
 
 def scrape_from_html(html_content: bytes) -> dict:
     """ Scrapes from html to get the product_name,original_price,discount_price in a dictionary. """
-    product_information = {}
+    s = BeautifulSoup(html_content, 'html.parser')
+
+    results = s.find(id="game_area_purchase")
+    original_price = results.find_all(
+        "div", class_="discount_original_price")[0]
+    discount_price = results.find_all(
+        "div", class_="discount_final_price")[0]
+
+    product_information = {"original_price": original_price,
+                           "discount_price": discount_price}
 
     return product_information

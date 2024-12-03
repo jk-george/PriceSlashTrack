@@ -38,7 +38,6 @@ jobs:
           # Extract the score from pylint output (last line)
           pylint_score=$(echo "$pylint_output" | tail -n 1 | grep -oP "\d+\.\d{1,2}$")
           
-          # Check if score is above 9
           if [ $(echo "$pylint_score >= 9" | bc) -eq 1 ]; then
             echo "Pylint score is $pylint_score, passing."
           else

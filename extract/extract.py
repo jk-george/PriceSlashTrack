@@ -20,3 +20,10 @@ def get_html_from_url(web_page: str) -> bytes:
     """ Gets the html content from a given URL"""
     html = requests.get(web_page)
     return html.content
+
+
+def scrape_from_html(html_content: bytes) -> dict:
+    """ Scrapes from html to get the product_name,original_price,discount_price in a dictionary. """
+    product_information = {}
+
+    return product_information

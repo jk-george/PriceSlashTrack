@@ -4,16 +4,19 @@ from extract import scrape_from_html, get_html_from_url, get_website_from_url
 
 
 def test_website_finder_finds_com_websites():
+    """ Tests if .com/asdasf gets replaced correctly. """
     assert get_website_from_url(
         "something.com/something-else") == "something.com"
 
 
 def test_website_finder_finds_co_uk_websites():
+    """ Tests if .co.uk/sasda gets replaced correctly"""
     assert get_website_from_url(
         "something.co.uk/something-else") == "something.co.uk"
 
 
 def test_url_is_not_valid_returns_error_message():
+    """ Tests if an invalid URL gets caught. """
     assert get_html_from_url(
         "https://random_url") == "That URL does not exist."
     assert get_html_from_url("random_url") == "That URL does not exist."
@@ -21,6 +24,7 @@ def test_url_is_not_valid_returns_error_message():
 
 @pytest.fixture
 def html_object():
+    """Fixture that creates a test html string of a game called The Planet Crafter"""
     with open("test_html.txt", "r", encoding="UTF-8") as test_file:
         html_string = test_file.read()
     return html_string

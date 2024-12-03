@@ -27,4 +27,10 @@ jobs:
 
     - name: Analyse the code with pylint if *.py files exist
       run: |
+        py_files=$(git ls-files '*.py')
+        if [ -z "$py_files" ]; then
+          echo "No Python files found, skipping pylint analysis."
+        else
           pylint --fail-under 9.0 **/*.py
+        fi
+

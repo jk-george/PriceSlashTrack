@@ -19,7 +19,7 @@ def extract_urls_from_db() -> list[str]:
 def get_html_from_url(web_page: str) -> bytes:
     """ Gets the html content from a given URL"""
     try:
-        html = requests.get(web_page)
+        html = requests.get(web_page, timeout=20)
     except requests.exceptions.MissingSchema:
         return "That URL does not exist."
     except requests.exceptions.ConnectionError:
@@ -31,6 +31,7 @@ def get_html_from_url(web_page: str) -> bytes:
 
 def get_website_from_url(url: str) -> str:
     """ Gets a main website address from a given URL """
+    website_url = url
     if ".com" in url:
         website_url = url.split(".com")[0] + ".com"
     elif ".co.uk" in url:
@@ -39,7 +40,12 @@ def get_website_from_url(url: str) -> str:
 
 
 def scrape_from_html(html_content: bytes, url: str) -> dict:
-    """ Scrapes from html to get the product_name,original_price,discount_price,website in a dictionary. """
+    """ Scrapes from html to get a dictionary with the: 
+    - product_name
+    - original_price
+    - discount_price
+    - website 
+    """
     s = BeautifulSoup(html_content, 'html.parser')
 
     results = s.find(id="game_area_purchase")

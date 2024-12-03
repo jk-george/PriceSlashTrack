@@ -39,7 +39,7 @@ def get_website_from_url(url: str) -> str:
 
 
 def scrape_from_html(html_content: bytes, url: str) -> dict:
-    """ Scrapes from html to get the product_name,original_price,discount_price in a dictionary. """
+    """ Scrapes from html to get the product_name,original_price,discount_price,website in a dictionary. """
     s = BeautifulSoup(html_content, 'html.parser')
 
     results = s.find(id="game_area_purchase")
@@ -52,6 +52,7 @@ def scrape_from_html(html_content: bytes, url: str) -> dict:
 
     product_information = {"original_price": original_price.text,
                            "discount_price": discount_price.text,
-                           "game_title": game_title.text}
+                           "game_title": game_title.text,
+                           "website": get_website_from_url(url)}
 
     return product_information

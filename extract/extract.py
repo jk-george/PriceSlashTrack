@@ -29,7 +29,16 @@ def get_html_from_url(web_page: str) -> bytes:
     return html.content
 
 
-def scrape_from_html(html_content: bytes) -> dict:
+def get_website_from_url(url: str) -> str:
+    """ Gets a main website address from a given URL """
+    if ".com" in url:
+        website_url = url.split(".com")[0] + ".com"
+    elif ".co.uk" in url:
+        website_url = url.split(".co.uk")[0] + ".co.uk"
+    return website_url
+
+
+def scrape_from_html(html_content: bytes, url: str) -> dict:
     """ Scrapes from html to get the product_name,original_price,discount_price in a dictionary. """
     s = BeautifulSoup(html_content, 'html.parser')
 
@@ -38,8 +47,11 @@ def scrape_from_html(html_content: bytes) -> dict:
         "div", class_="discount_original_price")[0]
     discount_price = results.find_all(
         "div", class_="discount_final_price")[0]
+    game_title = s.find(
+        id="appHubAppName", class_="apphub_AppName")
 
-    product_information = {"original_price": original_price,
-                           "discount_price": discount_price}
+    product_information = {"original_price": original_price.text,
+                           "discount_price": discount_price.text,
+                           "game_title": game_title.text}
 
     return product_information

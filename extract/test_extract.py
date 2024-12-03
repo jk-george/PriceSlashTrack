@@ -1,7 +1,16 @@
-from extract import scrape_from_html, get_html_from_url
-
+from extract import scrape_from_html, get_html_from_url, get_website_from_url
 import pytest
 from unittest.mock import MagicMock
+
+
+def test_website_finder_finds_com_websites():
+    assert get_website_from_url(
+        "something.com/something-else") == "something.com"
+
+
+def test_website_finder_finds_co_uk_websites():
+    assert get_website_from_url(
+        "something.co.uk/something-else") == "something.co.uk"
 
 
 def test_url_is_not_valid_returns_error_message():

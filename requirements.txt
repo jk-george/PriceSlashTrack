@@ -2,3 +2,5 @@ bs4
 requests
 pytest
 pylint
+python-dotenv
+psycopg2

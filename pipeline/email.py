@@ -1,11 +1,11 @@
 """Script to notify users via email when the price of a product drops below a certain threshold."""
 
 from os import environ as ENV
+import logging
 
 import boto3
 from boto3.exceptions import Boto3Error
 from psycopg2.extensions import connection
-import logging
 
 from connect_to_database import configure_logging, get_connection, get_cursor
 

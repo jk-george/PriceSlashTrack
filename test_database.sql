@@ -72,10 +72,10 @@ VALUES
     (59.99, 5, '2024-12-09 14:00:00');
 
 
-INSERT INTO subscription (user_id, product_id, discount_percentage)
+INSERT INTO subscription (user_id, product_id, notification_price)
 VALUES 
-    (1, 1, 10.0),
-    (2, 2, 5.0),
-    (3, 3, 15.0),
-    (4, 4, 8.0),
-    (5, 5, 12.0);
+    (1, 1, 900.0),
+    (2, 2, 730.0),
+    (3, 3, 150.0),
+    (4, 4, 270.0),
+    (5, 5, 80.0);

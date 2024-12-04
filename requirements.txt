@@ -1,5 +1,9 @@
+bs4
+requests
+pytest
+pylint
+python-dotenv
+psycopg2-binary
 streamlit
 pandas
 altair
-psycopg2-binary
-python-dotenv

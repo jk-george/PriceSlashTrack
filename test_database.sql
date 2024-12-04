@@ -12,7 +12,8 @@ VALUES
     ('eBay'),
     ('BestBuy'),
     ('Walmart'),
-    ('Target');
+    ('Target'),
+    ('Steam');
 
 INSERT INTO product (product_name, url, website_id, original_price)
 VALUES 
@@ -20,7 +21,9 @@ VALUES
     ('Smartphone', 'https://www.ebay.com/smartphone', 2, 799.99),
     ('Headphones', 'https://www.bestbuy.com/headphones', 3, 199.99),
     ('Tablet', 'https://www.walmart.com/tablet', 4, 299.99),
-    ('Smartwatch', 'https://www.target.com/smartwatch', 5, 149.99);
+    ('Smartwatch', 'https://www.target.com/smartwatch', 5, 149.99),
+    ('Cyberpunk 2077','https://store.steampowered.com/app/1091500/Cyberpunk_2077/',6,49.99),
+    ('Stardew Valley','https://store.steampowered.com/app/413150/Stardew_Valley/',6,10.99);
 
 INSERT INTO price (price, product_id, timestamp)
 VALUES 

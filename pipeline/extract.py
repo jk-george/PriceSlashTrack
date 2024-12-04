@@ -5,6 +5,9 @@ Extraction script to find all sales tracking data we need from subscribed URL pa
 2. Query all URLs from the RDS
 3. Scrape the URL for: product_name,original_price,discount_price
 
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -p $DB_PORT -> to connect to db for testing
+
+
 """
 import logging
 
@@ -90,6 +93,7 @@ def main_extraction_process() -> list[dict]:
     """ Carries out the whole extraction process into a list of dictionaries,
     ready to be transformed/inserted into a Database. """
     list_of_urls = extract_urls_from_db()
+    print(list_of_urls)
 
     all_scraped_product_information = []
 
@@ -100,8 +104,8 @@ def main_extraction_process() -> list[dict]:
             html_of_url, web_url, url_info[0])
 
         if extracted_web_data:
-            list_of_urls.append(extracted_web_data)
-    return list_of_urls
+            all_scraped_product_information.append(extracted_web_data)
+    return all_scraped_product_information
 
 
 if __name__ == "__main__":

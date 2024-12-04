@@ -6,9 +6,11 @@ Extraction script to find all sales tracking data we need from subscribed URL pa
 3. Scrape the URL for: product_name,original_price,discount_price
 
 """
+import logging
 
 from connect_to_database import get_connection, get_cursor
 
+from dotenv import load_dotenv
 import requests
 from bs4 import BeautifulSoup
 
@@ -17,8 +19,9 @@ SELECT product_id,url FROM product;
 """
 
 
-def extract_urls_from_db() -> list[str]:
-    """Function to get urls from a database"""
+def extract_urls_from_db() -> list[list[int, str]]:
+    """Function to get urls from a database
+    returns the id of the product and its URL page in a list: [id,url]"""
     conn = get_connection()
 
     with get_cursor(conn) as db_cursor:
@@ -51,8 +54,9 @@ def get_website_from_url(url: str) -> str:
     return website_url
 
 
-def scrape_from_html(html_content: bytes, url: str) -> dict:
-    """ Scrapes from html to get a dictionary with the: 
+def scrape_from_html(html_content: bytes, url: str, product_id: int) -> dict:
+    """ Scrapes from html to get a dictionary with the:
+    - Product_ID 
     - product_name
     - original_price
     - discount_price
@@ -61,6 +65,11 @@ def scrape_from_html(html_content: bytes, url: str) -> dict:
     s = BeautifulSoup(html_content, 'html.parser')
 
     results = s.find(id="game_area_purchase")
+
+    if not results:
+        logging.error("Can't scrape that URL.")
+        return None
+
     original_price = results.find_all(
         "div", class_="discount_original_price")[0]
     discount_price = results.find_all(
@@ -68,7 +77,8 @@ def scrape_from_html(html_content: bytes, url: str) -> dict:
     game_title = s.find(
         id="appHubAppName", class_="apphub_AppName")
 
-    product_information = {"original_price": original_price.text,
+    product_information = {"product_id": product_id,
+                           "original_price": original_price.text,
                            "discount_price": discount_price.text,
                            "game_title": game_title.text,
                            "website": get_website_from_url(url)}
@@ -79,11 +89,23 @@ def scrape_from_html(html_content: bytes, url: str) -> dict:
 def main_extraction_process() -> list[dict]:
     """ Carries out the whole extraction process into a list of dictionaries,
     ready to be transformed/inserted into a Database. """
-    ...
+    list_of_urls = extract_urls_from_db()
+
+    all_scraped_product_information = []
+
+    for url_info in list_of_urls:  # each url_info is : [id: int,url: str]
+        web_url = url_info[1]
+        html_of_url = get_html_from_url(web_url)
+        extracted_web_data = scrape_from_html(
+            html_of_url, web_url, url_info[0])
+
+        if extracted_web_data:
+            list_of_urls.append(extracted_web_data)
+    return list_of_urls
 
 
 if __name__ == "__main__":
-    urls = extract_urls_from_db()
-    print(urls)
+    load_dotenv()
+    print(main_extraction_process())
 
     ...

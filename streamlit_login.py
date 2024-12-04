@@ -50,12 +50,35 @@ def create_account(first_name, last_name, new_email, new_password) -> bool:
         return False
 
 
+def track_product(product_name, url, original_price, notification_price):
+    """"""
+    try:
+        conn = get_connection()
+        cursor = get_cursor(conn)
+        query = """
+            INSERT INTO website (website_name) VALUES (%s);
+            INSERT INTO product (product_name, url, website_id, original_price) 
+            VALUES (%s, %s, %s, %s);
+            INSERT INTO subscription (user_id, product_id, notification_price) VALUES (
+            %s, %s, %s)"""
+        cursor.execute(query, ())
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        st.error(f"Error inserting into the database: {e}")
+        return False
+
+
 def show_main_page():
     with mainSection:
         st.header("Track a new product")
         product = st.text_input("Enter a new product URL: ")
         notification_price = st.text_input(
             label="Enter the price threshold to receive email notifications about price drops: ")
+        st.button("Track", on_click=track_clicked,
+                  args=(product, notification_price))
         processingClicked = st.button("Start Processing", key="processing")
         if processingClicked:
             st.balloons()
@@ -84,11 +107,16 @@ def create_account_clicked(first_name, last_name, new_email, new_password):
     """Verifies new account details and changes logged in state"""
     if not first_name or not last_name or not new_email or not new_password:
         st.error("All fields are required to create an account.")
-    if create_account(first_name, last_name, new_email, new_password):
+        st.session_state['loggedIn'] = False
+    elif create_account(first_name, last_name, new_email, new_password):
         st.session_state['loggedIn'] = True
     else:
         st.session_state['loggedIn'] = False
         st.error("Error occurred when creating account")
+
+
+def track_clicked():
+    ...
 
 
 def show_login_page():

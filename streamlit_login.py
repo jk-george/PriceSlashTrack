@@ -84,3 +84,14 @@ if __name__ == "__main__":
                 show_main_page()
             else:
                 show_login_page()
+
+# functions to add:
+
+# when on homepage
+
+# - inserts new users - add to
+
+# when logged in
+
+# - inserts new URLs
+# - remove subscription

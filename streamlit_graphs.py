@@ -39,7 +39,7 @@ def get_cursor():
 def download_data_from_database(query: str) -> pd.DataFrame:
     """Downloads data from database and convert to a dataframe"""
     conn = get_connection()
-    cursor = get_cursor(conn)
+    cursor = get_cursor()
     cursor.execute(query)
     data = cursor.fetchall()
     columns = [desc[0] for desc in cursor.description]

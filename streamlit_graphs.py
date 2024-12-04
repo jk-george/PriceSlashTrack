@@ -24,9 +24,8 @@ def get_connection():
         return None
 
 
-def get_cursor():
+def get_cursor(conn):
     """Gets cursor to the database"""
-    conn = get_connection()
     if conn:
         try:
             return conn.cursor()

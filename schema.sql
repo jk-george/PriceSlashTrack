@@ -6,10 +6,10 @@ DROP TABLE IF EXISTS users CASCADE;
 
 CREATE TABLE users (
     user_id INT GENERATED ALWAYS AS IDENTITY,
-    first_name VARCHAR(30),
-    last_name VARCHAR(30),
+    first_name VARCHAR(30) NOT NULL,
+    last_name VARCHAR(30) NOT NULL,
     email_address VARCHAR(320) NOT NULL UNIQUE,
-    password VARCHAR(30),
+    password VARCHAR(30) NOT NULL,
     PRIMARY KEY (user_id)
 );
 

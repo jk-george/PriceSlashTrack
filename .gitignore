@@ -37,3 +37,6 @@ __pycache__
 *.tfvars
 *.terraform.*
 *.tfstate*
+
+test_docker_files
+

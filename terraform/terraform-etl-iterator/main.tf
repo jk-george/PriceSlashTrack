@@ -168,6 +168,7 @@ resource "aws_iam_policy" "scheduler_run_task_policy" {
     ]
   })
 }
+
 resource "aws_iam_role_policy_attachment" "attach_ecs_run_task_policy" {
   role       = aws_iam_role.scheduler_ecs_role.name
   policy_arn = aws_iam_policy.scheduler_run_task_policy.arn
@@ -199,10 +200,50 @@ resource "aws_iam_role_policy_attachment" "scheduler_vpc_access" {
 
 
 
+
+resource "aws_scheduler_schedule_group" "c14-priceslashers-schedule-group" {
+  name = "c14-priceslashers-schedule-group"
+}
+
+resource "aws_security_group" "task_exec_security_group"{
+  name        = "c14-priceslashers-sg"
+  description = "Allow inbound HTTPS traffic on port 443 from anywhere"
+  vpc_id      = var.VPC_ID  
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  ingress {
+    from_port   = var.DB_PORT
+    to_port     = var.DB_PORT
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  egress {
+    from_port   = var.DB_PORT
+    to_port     = var.DB_PORT
+    protocol    = "tcp"  
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"  
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 # Scheduler for ETL script
-resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
+resource "aws_scheduler_schedule" "priceslashers-ETL-scheduler" {
   name       = "c14-priceslashers-ETL-scheduler"
-  group_name = aws_scheduler_schedule_group.connect4-schedule-group.id
+  group_name = aws_scheduler_schedule_group.c14-priceslashers-schedule-group.id
 
   flexible_time_window {
     mode = "OFF"
@@ -219,7 +260,7 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
       task_definition_arn = aws_ecs_task_definition.etl-task-def.arn
       task_count = 1
       launch_type = "FARGATE"
-      group = "connect4-ETL-task"
+      group = "c14-priceslashers-ETL-task"
 
       network_configuration {
       

@@ -1,3 +1,4 @@
+# pylint: skip-file
 import unittest
 from datetime import datetime
 from transform import clean_price, main_transform_product_data
@@ -17,8 +18,8 @@ def test_clean_price_invalid():
     assert clean_price("") is None
 
 
-def test_transform_product_data():
-    """Tests data is valid"""
+def test_transform_product_data_valid():
+    """Tests data is valid and returns correct data and data formats"""
 
     test_data = [
         {"product_id": 1, "discount_price": "£22.49", "game_title": "Test Game"}
@@ -26,15 +27,16 @@ def test_transform_product_data():
     result = main_transform_product_data(test_data)
     assert result[0]["product_id"] == 1
     assert result[0]["price"] == 22.49
-    assert isinstance(result[0]["timestamp"], datetime)
+    assert isinstance(result[0]["timestamp"],
+                      str)
 
 
 def test_transform_invalid_data():
     """Tests invalid and missing data"""
     invalid_data = [
-        {'product_id': 1},
-        {'product_id': 2, 'discount_price': ''},
-        {'discount_price': '£22.49'}
+        {"product_id": 1},
+        {"product_id": 2, "discount_price": ""},
+        {"discount_price": "£22.49"}
     ]
 
     result = main_transform_product_data(invalid_data)

@@ -29,20 +29,18 @@ def main_transform_product_data(products_data: list[dict]) -> list[dict]:
         try:
             price = clean_price(product["discount_price"])
             if not price:
-                logging.error(f"""Invalid price: {
-                              product['product_id']}""")
+                logging.error("Invalid price: {%s}", product['product_id'])
                 continue
 
             cleaned_product_data = {
                 "price": price,
                 "product_id": int(product["product_id"]),
-                "timestamp": datetime.now()
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
             cleaned_data.append(cleaned_product_data)
-
         except (KeyError, ValueError) as e:
-            logging.error(f"""Error transforming product {
-                          product.get("product_id")}: {str(e)}""")
+            logging.error("Error transforming product %s: %s",
+                          product.get("product_id"), str(e))
             continue
 
     return cleaned_data
@@ -51,8 +49,9 @@ def main_transform_product_data(products_data: list[dict]) -> list[dict]:
 if __name__ == "__main__":
 
     fake_data = [{'product_id': 8, 'original_price': '£49.99', 'discount_price': '£22.49', 'game_title': 'Cyberpunk 2077', 'website': 'https://store.steampowered.com'},
-                 {'product_id': 9, 'original_price': '£10.99', 'discount_price': '£7.69', 'game_title': 'Stardew Valley', 'website': 'https://store.steampowered.com'}]
+                 {'product_id': 9, 'original_price': '£10.99', 'discount_price': '£7.69',
+                     'game_title': 'Stardew Valley', 'website': 'https://store.steampowered.com'},
+                 {'product_id': 5, 'original_price': '£149.99', 'discount_price': '£129.99', 'product_name': 'Smartwatch', 'website': 'https://store.steampowered.com'}]
 
-    cleaned_data = main_transform_product_data(fake_data)
-
-    print(cleaned_data)
+    new_data = main_transform_product_data(fake_data)
+    print(new_data)

@@ -41,9 +41,9 @@ def get_html_from_url(web_page: str) -> bytes:
     except requests.exceptions.MissingSchema:
         return "That URL does not exist."
     except requests.exceptions.ConnectionError:
-        return "That URL does not exist."
+        return "Cannot connect to that URL."
     if html.status_code > 299 or html.status_code < 200:
-        return "That URL does not exist."
+        return f"Error: {html.status_code}."
     return html.content
 
 

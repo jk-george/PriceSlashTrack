@@ -18,8 +18,10 @@ def test_website_finder_finds_co_uk_websites():
 def test_url_is_not_valid_returns_error_message():
     """ Tests if an invalid URL gets caught. """
     assert get_html_from_url(
-        "https://random_url") == "That URL does not exist."
+        "https://random_url") == "Cannot connect to that URL."
     assert get_html_from_url("random_url") == "That URL does not exist."
+    assert get_html_from_url(
+        "https://amazon.co.uk/something-random") == "Error: 404."
 
 
 @pytest.fixture

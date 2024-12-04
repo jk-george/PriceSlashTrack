@@ -38,3 +38,6 @@ venv
 *.tfvars
 *.terraform.*
 *.tfstate*
+
+test_docker_files
+

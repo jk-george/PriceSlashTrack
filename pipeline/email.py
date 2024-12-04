@@ -21,12 +21,12 @@ def get_ses_client() -> boto3.client:
                         aws_secret_access_key=ENV["AWS_ACCESS_SECRET_KEY"])
 
 
-def get_subscriptions_and_products(conn):
+def get_subscriptions_and_products(conn: connection):
     """Returns all active subscriptions along with product and user details."""
 
     with get_cursor(conn) as cur:
         cur.execute("""
-            SELECT s.subscription_id, s.user_id, s.product_id, s.notification_price, p.product_name, p.original_price, u.email_address
+            SELECT s.product_id, s.notification_price, p.product_name, u.email_address
             FROM subscription s
             JOIN product p ON s.product_id = p.product_id
             JOIN users u ON s.user_id = u.user_id
@@ -45,10 +45,7 @@ def get_current_product_price(conn: connection, product_id: int) -> float | None
         """, (product_id,))
         result = cur.fetchone()
 
-    if result:
-        return float(result["original_price"])
-
-    return None
+    return float(result["original_price"]) if result else None
 
 
 def send_email(to_address: str, subject: str, body: str) -> None:
@@ -76,13 +73,11 @@ def check_and_notify() -> None:
     """Checks product prices and notifies users via email if the price
     drops below their notification threshold."""
 
-    conn = get_connection()
-
-    try:
+    with get_connection() as conn:
         subscriptions = get_subscriptions_and_products(conn)
 
         for subscription in subscriptions:
-            subscription_id, user_id, product_id, notification_price, product_name, current_price, customer_email = subscription
+            product_id, notification_price, product_name, customer_email = subscription
 
             new_price = get_current_product_price(conn, product_id)
 
@@ -93,16 +88,13 @@ def check_and_notify() -> None:
 
             if new_price < notification_price:
                 subject = f"Price Drop Alert: {product_name}"
-                body = f"The price for {product_name} has dropped below your threshold of {
-                    notification_price}! The current price is {new_price}. Hurry before this sale ends!"
+                body = (f"The price for {product_name} has dropped below your threshold of "
+                        f"{notification_price}! The current price is {new_price}. Hurry before this sale ends!")
 
                 send_email(customer_email, subject, body)
 
                 logging.info("Notified %s about price drop for %s.",
                              customer_email, product_name)
-
-    finally:
-        conn.close()
 
 
 if __name__ == "__main__":

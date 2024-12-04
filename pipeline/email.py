@@ -33,7 +33,7 @@ def get_subscriptions_and_products(conn: connection):
     return subscriptions
 
 
-def get_current_product_price(conn: connection, product_id: int) -> float | None:
+def get_current_product_price(conn: connection, product_id: int) -> float:
     """Returns the current price of a specified product."""
 
     with get_cursor(conn) as cur:

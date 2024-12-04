@@ -10,9 +10,6 @@ from psycopg2.extensions import connection
 from connect_to_database import configure_logging, get_connection, get_cursor
 
 
-configure_logging()
-
-
 def get_ses_client() -> boto3.client:
     """Returns the boto3 SES client to send emails with."""
 
@@ -99,4 +96,5 @@ def check_and_notify() -> None:
 
 if __name__ == "__main__":
 
-    ...
+    configure_logging()
+    check_and_notify()

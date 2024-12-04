@@ -60,7 +60,8 @@ def send_email(to_address: str, subject: str, body: str) -> None:
             },
         )
         logging.info(
-            "Email sent to %s with status code %s.", to_address, response['ResponseMetadata']['HTTPStatusCode'])
+            "Email sent to %s with status code %s.",
+            to_address, response['ResponseMetadata']['HTTPStatusCode'])
 
     except Boto3Error as e:
         logging.error("Error sending email: %s", e)
@@ -86,7 +87,8 @@ def check_and_notify() -> None:
             if new_price < notification_price:
                 subject = f"Price Drop Alert: {product_name}"
                 body = (f"The price for {product_name} has dropped below your threshold of "
-                        f"{notification_price}! The current price is {new_price}. Hurry before this sale ends!")
+                        f"{notification_price}! The current price is {new_price}. "
+                        "Hurry before this sale ends!")
 
                 send_email(customer_email, subject, body)
 

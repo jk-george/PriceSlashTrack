@@ -42,8 +42,7 @@ CREATE TABLE subscription (
     subscription_id INT GENERATED ALWAYS AS IDENTITY,
     user_id INT NOT NULL,
     product_id INT NOT NULL,
-    discount_percentage FLOAT NOT NULL,
-    CONSTRAINT check_percentage CHECK (discount_percentage <= 100 AND discount_percentage >= 0),
+    notification_price FLOAT NOT NULL,
     PRIMARY KEY (subscription_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (product_id) REFERENCES product(product_id)

@@ -91,13 +91,14 @@ def scrape_from_html(html_content: bytes, url: str, product_id: int) -> dict:
 
 def main_extraction_process() -> list[dict]:
     """ Carries out the whole extraction process into a list of dictionaries,
-    ready to be transformed/inserted into a Database. """
+    ready to be transformed/inserted into a Database. 
+    Reminder: extract_urls_from_db() -> list of [id,url]"""
     list_of_urls = extract_urls_from_db()
     print(list_of_urls)
 
     all_scraped_product_information = []
 
-    for url_info in list_of_urls:  # each url_info is : [id: int,url: str]
+    for url_info in list_of_urls:
         web_url = url_info[1]
         html_of_url = get_html_from_url(web_url)
         extracted_web_data = scrape_from_html(

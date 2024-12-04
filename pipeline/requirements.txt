@@ -1,0 +1,7 @@
+bs4
+requests
+pytest
+pylint
+pandas
+python-dotenv
+psycopg2

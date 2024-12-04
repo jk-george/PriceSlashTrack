@@ -7,13 +7,25 @@ Extraction script to find all sales tracking data we need from subscribed URL pa
 
 """
 
+from connect_to_database import get_connection, get_cursor
+
 import requests
 from bs4 import BeautifulSoup
+
+QUERY_TO_FIND_URLS = """
+SELECT product_id,url FROM product;
+"""
 
 
 def extract_urls_from_db() -> list[str]:
     """Function to get urls from a database"""
-    ...
+    conn = get_connection()
+
+    with get_cursor(conn) as db_cursor:
+        db_cursor.execute(QUERY_TO_FIND_URLS)
+        url_list = db_cursor.fetchall()
+
+    return url_list
 
 
 def get_html_from_url(web_page: str) -> bytes:
@@ -62,3 +74,16 @@ def scrape_from_html(html_content: bytes, url: str) -> dict:
                            "website": get_website_from_url(url)}
 
     return product_information
+
+
+def main_extraction_process() -> list[dict]:
+    """ Carries out the whole extraction process into a list of dictionaries,
+    ready to be transformed/inserted into a Database. """
+    ...
+
+
+if __name__ == "__main__":
+    urls = extract_urls_from_db()
+    print(urls)
+
+    ...

@@ -3,6 +3,15 @@ provider "aws" {
 }
 
 
+data "aws_vpc" "VPC" {
+  id = var.VPC_ID
+}
+
+data "aws_ecs_cluster" "ecs_cluster" {
+  cluster_name = var.ECS_CLUSTER_NAME
+}
+
+
 resource "aws_ecr_repository" "ecr_for_etl" {
   name                 = var.ETL_ECR_NAME  
   image_tag_mutability = "MUTABLE"  
@@ -18,7 +27,7 @@ resource "aws_ecr_repository" "ecr_for_etl" {
 
 
 
-
+# Task definition permissions 
 resource "aws_iam_role" "ecs_role" {
   name               = "c14-priceslashers-ETL-role"
   assume_role_policy = jsonencode({
@@ -52,7 +61,7 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_logs_full_access" {
 }
 
 
-
+# Task Definition 
 resource "aws_ecs_task_definition" "etl-task-def" {
   family                   = "c14-priceslashers-ETL-taskdef"
   requires_compatibilities = ["FARGATE"]
@@ -103,7 +112,7 @@ resource "aws_ecs_task_definition" "etl-task-def" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = "/ecs/connect4-ETL-task"
+          "awslogs-group"         = "/ecs/c14-priceslashers-ETL-task"
           "awslogs-region"        = "eu-west-2"
           "awslogs-stream-prefix" = "ecs"
           "awslogs-create-group"  = "true"
@@ -115,6 +124,110 @@ resource "aws_ecs_task_definition" "etl-task-def" {
   runtime_platform {
     operating_system_family = "LINUX"
     cpu_architecture        = "X86_64"
+  }
+}
+
+
+# Scheduler permissions section
+
+resource "aws_iam_role" "scheduler_ecs_role" {
+  name = "c14-priceslashers-scheduler-ETL-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Principal = {
+          Service = "scheduler.amazonaws.com" 
+        }
+        Effect = "Allow"
+      }
+    ]
+  })
+}
+
+
+
+resource "aws_iam_policy" "scheduler_run_task_policy" {
+  name        = "c14-priceslashers-scheduler-run-task-policy"
+  description = "Allows ECS tasks to be run and pass roles"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "ecs:RunTask"
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = "iam:PassRole"
+        Resource = "*"
+      }
+    ]
+  })
+}
+resource "aws_iam_role_policy_attachment" "attach_ecs_run_task_policy" {
+  role       = aws_iam_role.scheduler_ecs_role.name
+  policy_arn = aws_iam_policy.scheduler_run_task_policy.arn
+}
+
+
+
+resource "aws_iam_role_policy_attachment" "scheduler_ecs_role_policy" {
+  role       = aws_iam_role.scheduler_ecs_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"  
+}
+
+
+
+resource "aws_iam_role_policy_attachment" "scheduler_logs_policy" {
+  role       = aws_iam_role.scheduler_ecs_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess" 
+}
+
+resource "aws_iam_role_policy_attachment" "scheduler_container_registry_readonly" {
+  role       = aws_iam_role.scheduler_ecs_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+resource "aws_iam_role_policy_attachment" "scheduler_vpc_access" {
+  role       = aws_iam_role.scheduler_ecs_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonVPCFullAccess"
+}
+
+
+
+# Scheduler for ETL script
+resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
+  name       = "c14-priceslashers-ETL-scheduler"
+  group_name = aws_scheduler_schedule_group.connect4-schedule-group.id
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  schedule_expression = "cron(*/3 * ? * * *)"
+
+  target {
+    arn      = data.aws_ecs_cluster.ecs_cluster.arn
+    role_arn = aws_iam_role.scheduler_ecs_role.arn
+
+
+    ecs_parameters {
+      task_definition_arn = aws_ecs_task_definition.etl-task-def.arn
+      task_count = 1
+      launch_type = "FARGATE"
+      group = "connect4-ETL-task"
+
+      network_configuration {
+      
+        assign_public_ip    = true
+        subnets             = var.SUBNET_IDS
+        security_groups     = [aws_security_group.task_exec_security_group.id]
+      }
+    }
   }
 }
 

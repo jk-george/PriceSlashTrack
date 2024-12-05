@@ -11,11 +11,11 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME -p $DB_PORT -> to connect to db for tes
 """
 import logging
 
-from connect_to_database import get_connection, get_cursor
-
 from dotenv import load_dotenv
 import requests
 from bs4 import BeautifulSoup
+
+from connect_to_database import get_connection, get_cursor
 
 QUERY_TO_FIND_URLS = """
 SELECT product_id,url FROM product;

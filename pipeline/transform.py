@@ -1,14 +1,7 @@
 """Processes and cleans the data extracted from extract.py"""
 from datetime import datetime
 import logging
-
-
-def configure_logging() -> None:
-    """Configure logging"""
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
-    )
+from connect_to_database import configure_logging
 
 
 def clean_price(price_str: str) -> float:
@@ -48,6 +41,7 @@ def main_transform_product_data(products_data: list[dict]) -> list[dict]:
 
 if __name__ == "__main__":
 
+    configure_logging()
     fake_data = [{'product_id': 8, 'original_price': '£49.99', 'discount_price': '£22.49', 'game_title': 'Cyberpunk 2077', 'website': 'https://store.steampowered.com'},
                  {'product_id': 9, 'original_price': '£10.99', 'discount_price': '£7.69',
                      'game_title': 'Stardew Valley', 'website': 'https://store.steampowered.com'},

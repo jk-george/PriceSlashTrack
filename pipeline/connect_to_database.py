@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 
 def configure_logging() -> None:
-    """Configure logging"""
+    """Configures logging in the terminal"""
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s'
@@ -29,7 +29,7 @@ def get_connection() -> connection:
         logging.info("Connected to the database successfully.")
         return conn
     except psycopg2.Error as e:
-        logging.error(f"Error connecting to the database: {e}")
+        logging.error("Error connecting to the database: %s", e)
         raise
 
 
@@ -38,7 +38,7 @@ def get_cursor(conn: connection) -> DictCursor:
     try:
         return conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     except psycopg2.Error as e:
-        logging.error(f"Error creating cursor: {e}")
+        logging.error("Error creating cursor: %s", e)
         raise
 
 

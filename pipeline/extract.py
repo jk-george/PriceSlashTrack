@@ -101,24 +101,34 @@ def scrape_from_html(html_content: bytes, url: str, product_id: int) -> dict:
         logging.error("Can't scrape that URL.")
         return None
 
-    original_price = results.find(
+    original_price_elem = results.find(
         "div", class_="discount_original_price")
-    discount_price = results.find(
+    discount_price_elem = results.find(
         "div", class_="discount_final_price")
-    game_title = s.find(
+    game_title_elem = s.find(
         id="appHubAppName", class_="apphub_AppName")
+    regular_price_elem = s.find("div", class_="game_purchase_price price", attrs={
+                                "data-price-final": True})
 
-    if not game_title:
+    if not game_title_elem:
         logging.error("Cannot find game title on the page for URL: %s", url)
         return None
+    game_title = game_title_elem.text.strip()
 
-    original_price = original_price.text.strip() if original_price else "N/A"
-    discount_price = discount_price.text.strip() if discount_price else "N/A"
+    if original_price_elem and discount_price_elem:
+        original_price = original_price_elem.text.strip() if original_price_elem else "N/A"
+        discount_price = discount_price_elem.text.strip() if discount_price_elem else "N/A"
+    elif regular_price_elem:
+        original_price = regular_price_elem.text.strip()
+        discount_price = original_price
+    else:
+        original_price = "N/A"
+        discount_price = "N/A"
 
     product_information = {"product_id": product_id,
                            "original_price": original_price,
                            "discount_price": discount_price,
-                           "game_title": game_title.text,
+                           "game_title": game_title,
                            "website": get_website_from_url(url)}
 
     return product_information

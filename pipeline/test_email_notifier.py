@@ -83,6 +83,7 @@ def test_send_email_success():
 
 
 def test_send_email_failure():
+    """Test error handling when sending an email fails."""
     mock_ses_client = mock.MagicMock()
     mock_ses_client.send_email.side_effect = Boto3Error("SES error")
 

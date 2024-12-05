@@ -13,12 +13,20 @@ from connect_to_database import configure_logging, get_connection, get_cursor
 def get_ses_client() -> boto3.client:
     """Returns the boto3 SES client to send emails with."""
 
+    aws_access_key = ENV.get("AWS_ACCESS_KEY_ID")
+    aws_secret_access_key = ENV.get("AWS_ACCESS_SECRET_KEY")
+    from_email = ENV.get("FROM_EMAIL")
+
+    if not aws_access_key or not aws_secret_access_key or not from_email:
+        raise RuntimeError("Required environment variables for AWS or email are missing. "
+                           "Ensure AWS_ACCESS_KEY, AWS_ACCESS_SECRET_KEY, and FROM_EMAIL are set.")
+
     return boto3.client("ses", region_name="eu-west-2",
-                        aws_access_key_id=ENV["AWS_ACCESS_KEY_ID"],
-                        aws_secret_access_key=ENV["AWS_ACCESS_SECRET_KEY"])
+                        aws_access_key_id=aws_access_key,
+                        aws_secret_access_key=aws_secret_access_key)
 
 
-def get_subscriptions_and_products(conn: connection):
+def get_subscriptions_and_products(conn: connection) -> list[tuple[int, float, str, str]]:
     """Returns all active subscriptions along with product and user details."""
 
     with get_cursor(conn) as cur:

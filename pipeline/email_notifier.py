@@ -14,12 +14,12 @@ def get_ses_client() -> boto3.client:
     """Returns the boto3 SES client to send emails with."""
 
     aws_access_key = ENV.get("AWS_ACCESS_KEY_ID")
-    aws_secret_access_key = ENV.get("AWS_ACCESS_SECRET_KEY")
+    aws_secret_access_key = ENV.get("AWS_SECRET_ACCESS_KEY")
     from_email = ENV.get("FROM_EMAIL")
 
     if not aws_access_key or not aws_secret_access_key or not from_email:
         raise RuntimeError("Required environment variables for AWS or email are missing. "
-                           "Ensure AWS_ACCESS_KEY, AWS_ACCESS_SECRET_KEY, and FROM_EMAIL are set.")
+                           "Ensure AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY, and FROM_EMAIL are set.")
 
     return boto3.client("ses", region_name="eu-west-2",
                         aws_access_key_id=aws_access_key,
@@ -46,11 +46,11 @@ def get_current_product_price(conn: connection, product_id: int) -> float:
 
     with get_cursor(conn) as cur:
         cur.execute("""
-            SELECT original_price FROM product WHERE product_id = %s
+            SELECT price FROM price_changes WHERE product_id = %s
         """, (product_id,))
         result = cur.fetchone()
 
-    return float(result["original_price"]) if result else None
+    return float(result["price"]) if result else None
 
 
 def send_email(to_address: str, subject: str, body: str) -> None:

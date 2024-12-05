@@ -1,5 +1,5 @@
 """Tests for email_notifier.py"""
-
+# pylint: skip-file
 from time import sleep
 from unittest import mock
 from unittest.mock import MagicMock, patch

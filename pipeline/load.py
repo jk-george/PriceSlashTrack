@@ -50,12 +50,8 @@ def load_price_changes(products_data: list[dict], conn: connection) -> None:
         logging.error("Load error during commit: %s", commit_error)
 
 
-def main_load():
+def main_load(cleaned_data: list[dict]) -> None:
     """Main function for loading price_changes values"""
-    cleaned_data = [
-        {"product_id": 7, "price": 7.69, "timestamp": "2024-12-04 16:31:40"},
-        {"product_id": 5, "price": 129.99, "timestamp": "2024-12-04 16:31:40"}
-    ]
 
     with get_connection() as connection:
         load_price_changes(cleaned_data, connection)

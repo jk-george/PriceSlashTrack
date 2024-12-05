@@ -1,10 +1,17 @@
 INSERT INTO users (first_name, last_name, email_address, password)
 VALUES
-    ('John', 'Doe', 'john.doe@example.com', 'password123'),
-    ('Jane', 'Smith', 'jane.smith@example.com', 'securepass'),
-    ('Alice', 'Johnson', 'alice.j@example.com', 'mypassword'),
-    ('Bob', 'Williams', 'bob.w@example.com', 'pass1234'),
-    ('John', 'Smith', 'john_s@example.com', 'abcdef');
+    -- ('John', 'Doe', 'john.doe@example.com', 'password123'),
+    -- ('Jane', 'Smith', 'jane.smith@example.com', 'securepass'),
+    -- ('Alice', 'Johnson', 'alice.j@example.com', 'mypassword'),
+    -- ('Bob', 'Williams', 'bob.w@example.com', 'pass1234'),
+    -- ('John', 'Smith', 'john_s@example.com', 'abcdef'),
+    ('John', 'Doe', 'chris.owen@sigmalabs.co.uk', 'password123'),
+    ('Jane', 'Smith', 'trainee.india.howell@sigmalabs.co.uk', 'securepass'),
+    ('Alice', 'Johnson', 'fariha.choudhury@sigmalabs.co.uk', 'mypassword'),
+    ('Bob', 'Williams', 'trainee.anita.megarry@sigmalabs.co.uk', 'pass1234'),
+    ('John', 'Smith', 'dan.keefe@sigmalabs.co.uk', 'abcdef'),
+    ('Gem', 'Lo', 'trainee.gem.lo@sigmalabs.co.uk', 'trainee');
+
 
 
 INSERT INTO website (website_name)
@@ -23,8 +30,10 @@ VALUES
     ('Headphones', 'https://www.bestbuy.com/headphones', 3, 199.99),
     ('Tablet', 'https://www.walmart.com/tablet', 4, 299.99),
     ('Smartwatch', 'https://www.target.com/smartwatch', 5, 149.99),
-    ('Cyberpunk 2077','https://store.steampowered.com/app/1091500/Cyberpunk_2077/',6,49.99),
-    ('Stardew Valley','https://store.steampowered.com/app/413150/Stardew_Valley/',6,10.99);
+    ('Slay the Spire', 'https://store.steampowered.com/app/646570/Slay_the_Spire/', 6, 19.99);
+
+    -- ('Cyberpunk 2077','https://store.steampowered.com/app/1091500/Cyberpunk_2077/',6,49.99),
+    -- ('Stardew Valley','https://store.steampowered.com/app/413150/Stardew_Valley/',6,10.99);
 
 INSERT INTO price_changes (price, product_id, timestamp)
 VALUES 
@@ -81,4 +90,5 @@ VALUES
     (2, 2, 730.0),
     (3, 3, 150.0),
     (4, 4, 270.0),
-    (5, 5, 80.0);
+    (5, 5, 80.0),
+    (6, 6, 10.99);

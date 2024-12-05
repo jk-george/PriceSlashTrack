@@ -45,7 +45,7 @@ if __name__ == "__main__":
     fake_data = [{'product_id': 8, 'original_price': '£49.99', 'discount_price': '£22.49', 'game_title': 'Cyberpunk 2077', 'website': 'https://store.steampowered.com'},
                  {'product_id': 9, 'original_price': '£10.99', 'discount_price': '£7.69',
                      'game_title': 'Stardew Valley', 'website': 'https://store.steampowered.com'},
-                 {'product_id': 5, 'original_price': '£149.99', 'discount_price': '£129.99', 'product_name': 'Smartwatch', 'website': 'https://store.steampowered.com'}]
+                 {'product_id': 5, 'original_price': '£149.99', 'discount_price': '£129.99', 'product_name': 'Smartwatch', 'website': 'https://www.target.com/smartwatch'}]
 
     new_data = main_transform_product_data(fake_data)
     print(new_data)

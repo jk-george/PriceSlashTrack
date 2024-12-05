@@ -23,7 +23,7 @@ def test_get_ses_client_success():
     """Test the successful creation of an SES client."""
     with mock.patch.dict("os.environ", {
         "AWS_ACCESS_KEY_ID": "fake_key_id",
-        "AWS_ACCESS_SECRET_KEY": "fake_secret_key",
+        "AWS_SECRET_ACCESS_KEY": "fake_secret_key",
         "FROM_EMAIL": "test@example.com"
     }), mock.patch("boto3.client") as mock_boto_client:
 
@@ -67,7 +67,7 @@ def test_send_email_success():
     with mock.patch.dict("os.environ", {
         "FROM_EMAIL": "test@example.com",
         "AWS_ACCESS_KEY_ID": "fake_key_id",
-        "AWS_ACCESS_SECRET_KEY": "fake_secret_key"
+        "AWS_SECRET_ACCESS_KEY": "fake_secret_key"
     }), mock.patch("email_notifier.get_ses_client", return_value=mock_ses_client):
         send_email("user@example.com", "Subject", "Body")
 
@@ -90,7 +90,7 @@ def test_send_email_failure():
     with mock.patch.dict("os.environ", {
         "FROM_EMAIL": "test@example.com",
         "AWS_ACCESS_KEY_ID": "fake_key_id",
-        "AWS_ACCESS_SECRET_KEY": "fake_secret_key"
+        "AWS_SECRET_ACCESS_KEY": "fake_secret_key"
     }), mock.patch("email_notifier.get_ses_client", return_value=mock_ses_client), \
             mock.patch("email_notifier.logging.error") as mock_error:
         send_email("user@example.com", "Subject", "Body")
@@ -117,7 +117,7 @@ def test_check_and_notify_price_drop():
     with mock.patch.dict("os.environ", {
         "FROM_EMAIL": "test@example.com",
         "AWS_ACCESS_KEY_ID": "fake_key_id",
-        "AWS_ACCESS_SECRET_KEY": "fake_secret_key"
+        "AWS_SECRET_ACCESS_KEY": "fake_secret_key"
     }), mock.patch("email_notifier.get_connection", return_value=mock_connection), \
             mock.patch("email_notifier.get_ses_client", return_value=mock_ses_client), \
             mock.patch("email_notifier.logging.info") as mock_info:
@@ -151,7 +151,7 @@ def test_check_and_notify_no_price_drop():
     with mock.patch.dict("os.environ", {
         "FROM_EMAIL": "test@example.com",
         "AWS_ACCESS_KEY_ID": "fake_key_id",
-        "AWS_ACCESS_SECRET_KEY": "fake_secret_key"
+        "AWS_SECRET_ACCESS_KEY": "fake_secret_key"
     }), mock.patch("email_notifier.get_connection", return_value=mock_connection), \
             mock.patch("email_notifier.get_ses_client", return_value=mock_ses_client), \
             mock.patch("email_notifier.logging.info") as mock_info:

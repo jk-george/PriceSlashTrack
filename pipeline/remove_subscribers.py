@@ -13,29 +13,9 @@ def get_active_subscriptions(conn: connection) -> set:
             cur.execute("""SELECT DISTINCT product_id
                 FROM subscription;""")
             active_subscriptions = cur.fetchall()
-        print(f"1: {active_subscriptions}")
         return {row[0] for row in active_subscriptions}
     except Exception as e:
         logging.error("Error fetching active subscriptions: %s", e)
-        return set()
-
-
-def get_recent_products_data(conn: connection) -> set:
-    """Returns all product_ids within the last 24 hours."""
-    try:
-        yesterday_timestamp = datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S") - timedelta(days=1)
-        print(yesterday_timestamp)
-        with conn.cursor() as cur:
-            cur.execute("""SELECT DISTINCT product_id
-                FROM price_changes
-                WHERE timestamp >= %s;""",
-                        (yesterday_timestamp,))
-            recent_products = cur.fetchall()
-        print(f"2: {recent_products}")
-        return {row[0] for row in recent_products}
-    except Exception as e:
-        logging.error("Error fetching recent products: %s", e)
         return set()
 
 
@@ -77,16 +57,14 @@ def main_remove_subscriptions() -> None:
     """Main function that removes unsubscribed products data from product, price_changes and website schema."""
     with get_connection() as conn:
         active_subscriptions = get_active_subscriptions(conn)
-        recent_products = get_recent_products_data(conn)
-        print(f"3:active_subscriptions: {active_subscriptions}")
-        print(f"4:recent_products: {recent_products}")
 
         with conn.cursor() as cur:
             cur.execute("SELECT product_id FROM product;")
             all_products = {row[0] for row in cur.fetchall()}
 
-        valid_product_ids = active_subscriptions | recent_products
-        unsubscribed_product_ids = list(all_products - valid_product_ids)
+        print(all_products)
+        print(active_subscriptions)
+        unsubscribed_product_ids = list(all_products - active_subscriptions)
 
         if unsubscribed_product_ids:
             delete_unsubscribed_data(conn, unsubscribed_product_ids)

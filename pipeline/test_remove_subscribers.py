@@ -3,7 +3,7 @@ import unittest
 import pytest
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
-from remove_subscribers import (get_active_subscriptions, get_recent_products_data,
+from remove_subscribers import (get_active_subscriptions,
                                 delete_unsubscribed_data, main_remove_subscriptions)
 
 
@@ -41,17 +41,6 @@ def test_get_active_subscriptions_error(mock_conn, mock_cursor):
     result = get_active_subscriptions(mock_conn)
 
     assert result == set()
-
-
-# def test_get_recent_products_data_success(mock_conn, mock_cursor):
-#     """Tests that product ids from the last 24 hours are returned"""
-#     mock_conn.cursor.return_value = mock_cursor
-#     mock_cursor.fetchall.return_value = [(4,), (5,)]
-
-#     result = get_recent_products_data(mock_conn)
-
-#     assert result == {4, 5}
-#     assert mock_cursor.execute.call_count == 1
 
 
 def test_delete_unsubscribed_data(mock_conn, mock_cursor):

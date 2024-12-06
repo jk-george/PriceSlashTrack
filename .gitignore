@@ -40,4 +40,5 @@ venv
 *.tfstate*
 
 test_docker_files
+.coverage
 

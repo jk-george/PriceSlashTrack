@@ -53,6 +53,28 @@ def get_current_product_price(conn: connection, product_id: int) -> float:
     return float(result["price"]) if result else None
 
 
+def has_notification_been_sent(conn: connection, user_id: int, product_id: int, price: float) -> bool:
+    """Checks if a notification has already been sent for a given user, product, and price."""
+
+    with get_cursor(conn) as cur:
+        cur.execute("""
+            SELECT 1 FROM notifications_sent
+            WHERE user_id = %s AND product_id = %s AND price = %s
+        """, (user_id, product_id, price))
+        result = cur.fetchone()
+    return result is not None
+
+
+def log_notification_sent(conn: connection, user_id: int, product_id: int, price: float) -> None:
+    """Logs a sent notification in the notifications_sent table."""
+
+    with get_cursor(conn) as cur:
+        cur.execute("""
+            INSERT INTO notifications_sent (user_id, product_id, price, timestamp)
+            VALUES (%s, %s, %s, NOW())
+        """, (user_id, product_id, price))
+
+
 def send_email(to_address: str, subject: str, body: str) -> None:
     """Sends an email using SES."""
 
@@ -85,17 +107,23 @@ def check_and_notify() -> None:
         for subscription in subscriptions:
             product_id, notification_price, product_name, customer_email = subscription
 
-            new_price = get_current_product_price(conn, product_id)
+            current_price = get_current_product_price(conn, product_id)
 
-            if new_price is None:
+            if current_price is None:
                 logging.warning("Product %s with ID %s not found.",
                                 product_name, product_id)
                 continue
 
-            if new_price < notification_price:
+            if current_price < notification_price:
+                if has_notification_been_sent(conn, subscription.user_id, product_id, current_price):
+                    logging.info("Notification already sent for user %s and product %s at price %s.",
+                                 subscription.user_id, product_name, current_price)
+                    continue
+
                 subject = f"Price Drop Alert: {product_name}"
                 body = (f"The price for {product_name} has dropped below your threshold of "
-                        f"{notification_price}! The current price is {new_price}. "
+                        f"{notification_price}! The current price is {
+                            current_price}. "
                         "Hurry before this sale ends!")
 
                 send_email(customer_email, subject, body)

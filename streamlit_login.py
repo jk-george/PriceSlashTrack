@@ -357,6 +357,9 @@ def track_product(user_id, url, notification_price):
     website_id = insert_into_website(get_website_from_url(url))
     product_id = insert_into_product(website_id, url)
     insert_into_subscription(user_id, product_id, notification_price)
+    price = (scrape_from_html(get_html_from_url(url), url)).get(
+        "discount_price")
+    insert_initial_price(clean_price(price), product_id)
     st.toast("New product successfully tracked!")
 
 

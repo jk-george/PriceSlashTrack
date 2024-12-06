@@ -130,7 +130,7 @@ def get_subscription_id(user_id: str, product_id: int) -> int:
         return None
 
 
-def get_product_subscription(user_id):
+def get_product_subscription(user_id) -> list:
     """Returns all product ids for a user"""
     try:
         conn = get_connection()
@@ -144,7 +144,7 @@ def get_product_subscription(user_id):
         return None
 
 
-def get_product_info(product_id):
+def get_product_info(product_id) -> tuple:
     """Returns all product info"""
     conn = get_connection()
     cursor = get_cursor(conn)
@@ -157,7 +157,7 @@ def get_product_info(product_id):
         return None
 
 
-def get_latest_price(product_id):
+def get_latest_price(product_id) -> float:
     """Returns the latest price of a product"""
     conn = get_connection()
     cursor = get_cursor(conn)
@@ -171,7 +171,7 @@ def get_latest_price(product_id):
         return None
 
 
-def display_charts(product_id):
+def display_charts(product_id) -> alt.Chart:
     """Displays charts for a product"""
     conn = get_connection()
     cursor = get_cursor(conn)
@@ -315,19 +315,20 @@ def show_main_page():
             st.altair_chart(display_charts(product_id))
 
 
-def LoggedOut_Clicked():
+def LoggedOut_Clicked() -> None:
     """Changes logged in state to false"""
     st.session_state['loggedIn'] = False
 
 
-def show_logout_page():
+def show_logout_page() -> None:
     """Displays logout page"""
     loginSection.empty()
     with logOutSection:
         st.button("Log Out", key="logout", on_click=LoggedOut_Clicked)
 
 
-def login_clicked(email, password):
+def login_clicked(email, password) -> None:
+    """Logins into account"""
     if login(email, password):
         st.session_state['loggedIn'] = True
         st.session_state['user_id'] = get_user_id(email)
@@ -337,7 +338,7 @@ def login_clicked(email, password):
         st.error("Invalid user name or password")
 
 
-def create_account_clicked(first_name, last_name, new_email, new_password):
+def create_account_clicked(first_name, last_name, new_email, new_password) -> None:
     """Verifies new account details and changes logged in state"""
     if not first_name or not last_name or not new_email or not new_password:
         st.error("All fields are required to create an account.")
@@ -351,14 +352,16 @@ def create_account_clicked(first_name, last_name, new_email, new_password):
         st.error("Error occurred when creating account")
 
 
-def track_clicked(user_id, url, notification_price):
+def track_clicked(user_id, url, notification_price) -> None:
+    """Tracks product"""
     if not url or not notification_price:
         st.error("All fields are required to track a product.")
     else:
         track_product(user_id, url, notification_price)
 
 
-def show_login_page():
+def show_login_page() -> None:
+    """Displays streamlit main page"""
     with loginSection:
         if st.session_state['loggedIn'] == False:
 

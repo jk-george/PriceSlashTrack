@@ -1,6 +1,12 @@
 import pytest
 
-from extract import scrape_from_html, get_html_from_url, get_website_from_url
+from extract import scrape_from_html, get_html_from_url, get_website_from_url, scrape_pricing_process
+
+
+def test_scrape_pricing_process_only_accepts_amazon_and_steam():
+    """Tests that scrape pricing process only accepts amazon and steam"""
+    assert scrape_pricing_process(
+        "html_data", "https://unknown.co.uk/something-random", 1) == None
 
 
 def test_website_finder_finds_com_websites():

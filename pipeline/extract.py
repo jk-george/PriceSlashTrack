@@ -85,6 +85,22 @@ def get_website_from_url(url: str) -> str:
     return website_url
 
 
+def scrape_from_steam():
+    """ Scrapes from Steam Websites. """
+
+
+def scrape_from_amazon():
+    """ Scrapes from Amazon product pages. """
+
+
+def scrape_pricing_process(html_content: bytes, url: str, product_id: int) -> dict:
+    """ Chooses which scraper to use based off of the URL """
+    if get_website_from_url(url) not in ["https://www.amazon.co.uk", "https://www.amazon.com", "https://store.steampowered.com/"]:
+        logging.error(
+            "Cannot scrape that URL, since it's not an Amazon/Steam webpage.")
+        return
+
+
 def scrape_from_html(html_content: bytes, url: str, product_id: int) -> dict:
     """ Scrapes from html to get a dictionary with the:
     - Product_ID 
@@ -92,7 +108,7 @@ def scrape_from_html(html_content: bytes, url: str, product_id: int) -> dict:
     - original_price
     - discount_price
     - website 
-    """
+    for STEAM Games/Products."""
     s = BeautifulSoup(html_content, 'html.parser')
 
     results = s.find(id="game_area_purchase")

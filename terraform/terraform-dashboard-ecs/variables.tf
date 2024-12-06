@@ -23,6 +23,7 @@ variable "DB_PORT"{
 }
 
 
-variable "DASHBOARD_ECR_URL"{
+variable "DASHBOARD_ECR_NAME"{
     type = string
+    description = "ECR that holds the Dashboard."
 }

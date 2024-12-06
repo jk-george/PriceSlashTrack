@@ -22,6 +22,10 @@ data "aws_subnet" "c14-subnet-3" {
   id = "subnet-0465f224c7432a02e"
 }
 
+data "aws_ecr_repository" "ecr_for_dashboard" {
+    name = var.DASHBOARD_ECR_NAME
+}
+
 
 
 resource "aws_ecs_task_definition" "c14-price-slash-dashboard-task-def" {
@@ -34,7 +38,7 @@ resource "aws_ecs_task_definition" "c14-price-slash-dashboard-task-def" {
   container_definitions    = jsonencode([
     {
       name         = "c14-price-slash-dashboard-task-def"
-      image        = var.DASHBOARD_ECR_URL
+      image        = data.aws_ecr_repository.ecr_for_dashboard.repository_url
       cpu          = 10
       memory       = 512
       essential    = true

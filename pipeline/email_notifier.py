@@ -104,9 +104,7 @@ def check_and_notify() -> None:
     with get_connection() as conn:
         subscriptions = get_subscriptions_and_products(conn)
 
-        for subscription in subscriptions:
-            product_id, notification_price, product_name, customer_email = subscription
-
+        for product_id, notification_price, product_name, customer_email in subscriptions:
             current_price = get_current_product_price(conn, product_id)
 
             if current_price is None:
@@ -115,9 +113,23 @@ def check_and_notify() -> None:
                 continue
 
             if current_price < notification_price:
-                if has_notification_been_sent(conn, subscription.user_id, product_id, current_price):
+                with get_cursor(conn) as cur:
+                    cur.execute("""
+                        SELECT user_id FROM users 
+                        WHERE email_address = %s
+                    """, (customer_email,))
+                    user_result = cur.fetchone()
+
+                if not user_result:
+                    logging.warning(
+                        "No user found for email %s", customer_email)
+                    continue
+
+                user_id = user_result['user_id']
+
+                if has_notification_been_sent(conn, user_id, product_id, current_price):
                     logging.info("Notification already sent for user %s and product %s at price %s.",
-                                 subscription.user_id, product_name, current_price)
+                                 user_id, product_name, current_price)
                     continue
 
                 subject = f"Price Drop Alert: {product_name}"

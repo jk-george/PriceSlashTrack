@@ -1,6 +1,6 @@
-# ☁️ Cloud Deployment of the dashboard ECS Service
+# ☁️ Cloud Deployment of the Pipeline
 
-This folder contains the Terraform code for the ETL pipeline, including the ECR repository the Docker image will be held in and the EventBridge scheduler that runs every 3 minutes.
+This folder contains the Terraform code for the ETL pipeline, including the ECS Task, the ECR repository the Docker image will be held in and the EventBridge scheduler that runs every 3 minutes.
 
 ## 🛠️ Prerequisites
 

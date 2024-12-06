@@ -1,4 +1,4 @@
-# ☁️ Cloud Deployment of the dashboard ECR repository
+# ☁️ Cloud Deployment of the dashboard ECS Service
 
 This folder contains the Terraform code for the ECS Service that will run the Streamlit dashboard.
 

@@ -9,7 +9,9 @@ from email_notifier import (
     get_ses_client,
     get_subscriptions_and_products,
     send_email,
-    check_and_notify
+    check_and_notify,
+    has_notification_been_sent,
+    log_notification_sent
 )
 
 
@@ -109,9 +111,15 @@ def test_check_and_notify_price_drop():
     mock_connection.__enter__.return_value = mock_connection
     mock_connection.cursor.return_value = mock_cursor
 
+    # Simulating the fetchall result as a tuple (product_id, price, product_name, email)
     mock_cursor.fetchall.return_value = [
         (1, 10.0, "Product A", "user@example.com")]
-    mock_cursor.fetchone.return_value = {"price": 5.0}
+
+    # Simulate user ID query
+    mock_cursor.fetchone.side_effect = [
+        {"price": 5.0},  # First call for current price
+        {"user_id": 1}   # Second call for user ID
+    ]
 
     mock_ses_client = MagicMock()
 
@@ -120,7 +128,8 @@ def test_check_and_notify_price_drop():
         "AWS_ACCESS_KEY_ID": "fake_key_id",
         "AWS_SECRET_ACCESS_KEY": "fake_secret_key"
     }), mock.patch("email_notifier.get_connection", return_value=mock_connection), \
-            mock.patch("email_notifier.get_ses_client", return_value=mock_ses_client):
+            mock.patch("email_notifier.get_ses_client", return_value=mock_ses_client), \
+            mock.patch("email_notifier.has_notification_been_sent", return_value=False):
         check_and_notify()
 
     mock_ses_client.send_email.assert_called_once_with(
@@ -156,3 +165,63 @@ def test_check_and_notify_no_price_drop():
         check_and_notify()
 
     mock_ses_client.send_email.assert_not_called()
+
+
+def test_has_notification_been_sent_true():
+    """Test when a notification has been sent previously."""
+    mock_connection = MagicMock()
+    mock_cursor = MagicMock()
+
+    # Simulate notification exists
+    mock_cursor.fetchone.return_value = {"exists": 1}
+
+    with patch("email_notifier.get_cursor") as mock_get_cursor:
+        mock_get_cursor.return_value.__enter__.return_value = mock_cursor
+
+        # Call the function
+        result = has_notification_been_sent(mock_connection, 1, 2, 9.99)
+
+    # Assertions
+    assert result is True
+    mock_cursor.execute.assert_called_once()
+
+
+def test_has_notification_been_sent_false():
+    """Test when no previous notification has been sent."""
+    mock_connection = MagicMock()
+    mock_cursor = MagicMock()
+
+    # Simulate no notification exists
+    mock_cursor.fetchone.return_value = None
+
+    with patch("email_notifier.get_cursor") as mock_get_cursor:
+        mock_get_cursor.return_value.__enter__.return_value = mock_cursor
+
+        # Call the function
+        result = has_notification_been_sent(mock_connection, 1, 2, 9.99)
+
+    # Assertions
+    assert result is False
+    mock_cursor.execute.assert_called_once()
+
+
+def test_log_notification_sent():
+    """Test logging a sent notification."""
+    mock_connection = MagicMock()
+    mock_cursor = MagicMock()
+
+    with patch("email_notifier.get_cursor") as mock_get_cursor:
+        mock_get_cursor.return_value.__enter__.return_value = mock_cursor
+
+        # Call the function
+        log_notification_sent(mock_connection, 1, 2, 9.99)
+
+    # Assertions
+    mock_cursor.execute.assert_called_once()
+    mock_cursor.execute.assert_called_with(
+        """
+            INSERT INTO notifications_sent (user_id, product_id, price, timestamp)
+            VALUES (%s, %s, %s, NOW())
+        """,
+        (1, 2, 9.99)
+    )

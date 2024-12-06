@@ -1,6 +1,7 @@
 """Runs the streamlit dashboard"""
 
 import logging
+from datetime import datetime
 import pandas as pd
 import altair as alt
 import streamlit as st
@@ -335,16 +336,19 @@ def insert_into_subscription(user_id, product_id, notification_price):
         return None
 
 
-def insert_initial_price(price, product_id):
+def insert_initial_price(price, product_id) -> None:
     """Inserts initial price data into the price_changes table"""
     conn = get_connection()
     cursor = get_cursor(conn)
     try:
         cursor.execute(
             """INSERT INTO price_changes (price, product_id, timestamp) VALUES (%s, %s, %s);""",
-            (price, product_id, timestamp))
+            (price, product_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        cursor.close()
+        conn.commit()
+        conn.close()
     except Exception as e:
-        st.error(f"Error inserting into the database (subscription): {e}")
+        st.error(f"Error inserting into the database (price_changes): {e}")
         return None
 
 

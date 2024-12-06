@@ -1,4 +1,4 @@
-# ☁️ Cloud Deployment of the dashboard ECS Service
+# ☁️ Cloud Deployment of the Database
 
 This folder contains the Terraform code for the AWS RDS (PostgreSQL) database.
 

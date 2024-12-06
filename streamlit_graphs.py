@@ -35,18 +35,5 @@ def get_cursor(conn):
     return None
 
 
-def download_data_from_database(query: str) -> pd.DataFrame:
-    """Downloads data from database and convert to a dataframe"""
-    conn = get_connection()
-    cursor = get_cursor()
-    cursor.execute(query)
-    data = cursor.fetchall()
-    columns = [desc[0] for desc in cursor.description]
-    dataframe = pd.DataFrame(data, columns=columns)
-    cursor.close()
-    conn.close()
-    return dataframe
-
-
 if __name__ == "__main__":
     print(get_connection())

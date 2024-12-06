@@ -15,8 +15,36 @@ loginSection = st.container()
 logOutSection = st.container()
 
 
+def get_html_with_age_gate_bypass(url: str) -> bytes:
+    """Handles Steam URLs with age-gates by simulating form submission."""
+    try:
+        session = requests.Session()
+        session.get(url, timeout=20)
+
+        app_id = url.split('/app/')[1].split('/')[0]
+
+        age_gate_data = {
+            "ageDay": "1",
+            "ageMonth": "January",
+            "ageYear": "1990",
+        }
+        bypass_url = f"https://store.steampowered.com/agecheck/app/{app_id}/"
+        session.post(bypass_url, data=age_gate_data, timeout=20)
+
+        response = session.get(url, timeout=20)
+        response.raise_for_status()
+
+        return response.content
+    except requests.exceptions.RequestException as e:
+        logging.error("Error fetching age-gated URL %s: %s", url, e)
+        return None
+
+
 def get_html_from_url(web_page: str) -> bytes:
-    """Gets the html content from a given URL"""
+    """ Gets the html content from a given URL"""
+    if "store.steampowered.com" in web_page:
+        return get_html_with_age_gate_bypass(web_page)
+
     try:
         html = requests.get(web_page, timeout=20)
     except requests.exceptions.MissingSchema:
@@ -39,9 +67,10 @@ def get_website_from_url(url: str) -> str:
 
 
 def scrape_from_html(html_content: bytes, url: str) -> dict:
-    """Scrapes from html to get a dictionary with the:
+    """ Scrapes from html to get a dictionary with the:
     - product_name
     - original_price
+    - discount_price
     - website
     """
     s = BeautifulSoup(html_content, 'html.parser')
@@ -52,13 +81,33 @@ def scrape_from_html(html_content: bytes, url: str) -> dict:
         logging.error("Can't scrape that URL.")
         return None
 
-    original_price = results.find_all(
-        "div", class_="discount_original_price")[0]
-    game_title = s.find(
+    original_price_elem = results.find(
+        "div", class_="discount_original_price")
+    discount_price_elem = results.find(
+        "div", class_="discount_final_price")
+    game_title_elem = s.find(
         id="appHubAppName", class_="apphub_AppName")
+    regular_price_elem = s.find("div", class_="game_purchase_price price", attrs={
+                                "data-price-final": True})
 
-    product_information = {"game_title": game_title.text,
-                           "original_price": original_price.text,
+    if not game_title_elem:
+        logging.error("Cannot find game title on the page for URL: %s", url)
+        return None
+    game_title = game_title_elem.text.strip()
+
+    if original_price_elem and discount_price_elem:
+        original_price = original_price_elem.text.strip() if original_price_elem else "N/A"
+        discount_price = discount_price_elem.text.strip() if discount_price_elem else "N/A"
+    elif regular_price_elem:
+        original_price = regular_price_elem.text.strip()
+        discount_price = original_price
+    else:
+        original_price = "N/A"
+        discount_price = "N/A"
+
+    product_information = {"original_price": original_price,
+                           "discount_price": discount_price,
+                           "game_title": game_title,
                            "website": get_website_from_url(url)}
 
     return product_information
@@ -286,12 +335,40 @@ def insert_into_subscription(user_id, product_id, notification_price):
         return None
 
 
+def insert_initial_price(price, product_id):
+    """Inserts initial price data into the price_changes table"""
+    conn = get_connection()
+    cursor = get_cursor(conn)
+    try:
+        cursor.execute(
+            """INSERT INTO price_changes (price, product_id, timestamp) VALUES (%s, %s, %s);""",
+            (price, product_id, timestamp))
+    except Exception as e:
+        st.error(f"Error inserting into the database (subscription): {e}")
+        return None
+
+
 def track_product(user_id, url, notification_price):
     """Inserts product details into the database"""
     website_id = insert_into_website(get_website_from_url(url))
     product_id = insert_into_product(website_id, url)
     insert_into_subscription(user_id, product_id, notification_price)
     st.toast("New product successfully tracked!")
+
+
+def stop_tracking_product(user_id, product_id):
+    """Unsubscribes user from a product"""
+    conn = get_connection()
+    cursor = get_cursor(conn)
+    try:
+        cursor.execute(
+            """DELETE FROM subscription WHERE user_id = %s AND product_id = %s""", (user_id, product_id,))
+        cursor.close()
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        st.error(f"Error unsubscribing from product tracking: {e}")
+        return None
 
 
 def show_main_page():

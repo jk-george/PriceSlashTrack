@@ -73,7 +73,7 @@ def get_html_from_url(web_page: str) -> bytes:
     if html.status_code > 299 or html.status_code < 200:
         logging.error(
             f"Issue with provided web_page: HTML Status Code - {html.status_code}")
-        return f"Error: Something went wrong when trying to reach your webpage.."
+        return f"Error: Something went wrong when trying to reach your webpage."
     return html.content
 
 

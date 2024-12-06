@@ -27,7 +27,7 @@ def test_url_is_not_valid_returns_error_message():
         "https://random_url") == "Cannot connect to that URL."
     assert get_html_from_url("random_url") == "That URL does not exist."
     assert get_html_from_url(
-        "https://amazon.co.uk/something-random") == "Error: 404."
+        "https://amazon.co.uk/something-random") == "Error: Something went wrong when trying to reach your webpage."
 
 
 @pytest.fixture

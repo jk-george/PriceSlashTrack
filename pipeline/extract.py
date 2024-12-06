@@ -71,7 +71,9 @@ def get_html_from_url(web_page: str) -> bytes:
     except requests.exceptions.ConnectionError:
         return "Cannot connect to that URL."
     if html.status_code > 299 or html.status_code < 200:
-        return f"Error: {html.status_code}."
+        logging.error(
+            f"Issue with provided web_page: HTML Status Code - {html.status_code}")
+        return f"Error: Something went wrong when trying to reach your webpage.."
     return html.content
 
 

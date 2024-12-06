@@ -103,8 +103,40 @@ def scrape_pricing_process(html_content: bytes, url: str, product_id: int) -> di
     return
 
 
-def scrape_from_amazon_html():
-    """ Scrapes from Amazon product pages. """
+def scrape_from_amazon_html(html_content, url, product_id):
+    """ Scrapes from html to get a dictionary with the:
+    - Product_ID 
+    - product_name
+    - original_price
+    - discount_price
+    - website 
+    for Amazon Product Pages."""
+    s = BeautifulSoup(html_content, 'html.parser')
+
+    results = s.find("div", id="corePriceDisplay_desktop_feature_div")
+
+    if not results:
+        logging.error("Can't scrape from Amazon URL")
+        return None
+
+    game_title_elem = s.find(id="productTitle")
+
+    if not game_title_elem:
+        logging.error("Cannot find game title on the page for URL: %s", url)
+        return None
+
+    discount_price = results.find(
+        "span", class_="a-price aok-align-center reinventPricePriceToPayMargin priceToPay").text
+    original_price = results.find(
+        "div", class_="a-section a-spacing-small aok-align-center").find("span", class_="a-offscreen").text
+    game_title = game_title_elem.text.strip()
+
+    product_information = {"product_id": product_id,
+                           "original_price": original_price,
+                           "discount_price": discount_price,
+                           "game_title": game_title,
+                           "website": get_website_from_url(url)}
+    return product_information
 
 
 def scrape_from_steam_html(html_content: bytes, url: str, product_id: int) -> dict:
@@ -120,7 +152,7 @@ def scrape_from_steam_html(html_content: bytes, url: str, product_id: int) -> di
     results = s.find(id="game_area_purchase")
 
     if not results:
-        logging.error("Can't scrape that URL.")
+        logging.error("Can't scrape that Steam URL.")
         return None
 
     original_price_elem = results.find(
@@ -133,7 +165,7 @@ def scrape_from_steam_html(html_content: bytes, url: str, product_id: int) -> di
                                 "data-price-final": True})
 
     if not game_title_elem:
-        logging.error("Cannot find game title on the page for URL: %s", url)
+        logging.error("Cannot find product title on the page for URL: %s", url)
         return None
     game_title = game_title_elem.text.strip()
 

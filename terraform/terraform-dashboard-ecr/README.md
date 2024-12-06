@@ -9,3 +9,23 @@ Please read the README located in the top-level Terraform folder for detailed in
 ## ⚙️ Setup
 
 1. Create a `terraform.tfvars` file and fill it with the following variables:
+```bash
+Necessary variables to be updated later - please follow same structure as in the top level Terraform README!
+```
+
+2. Initialise Terraform:
+```bash
+terraform init
+```
+
+3. Deploy cloud services:
+```bash
+terraform apply
+```
+  - Enter 'yes' when it asks to approve changes.
+  - Can be used to redeploy if resource definitions have been changed.
+
+4. To bring down the cloud infrastructure:
+```bash
+terraform destroy
+```

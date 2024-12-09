@@ -1,18 +1,20 @@
 """Runs the streamlit dashboard"""
 
 import logging
+from datetime import datetime
 import pandas as pd
 import altair as alt
 import streamlit as st
 import requests
 import psycopg2
 from bs4 import BeautifulSoup
-from streamlit_graphs import get_connection, get_cursor
+from database_connection import get_connection, get_cursor
+from streamlit_option_menu import option_menu
 
-headerSection = st.container()
-mainSection = st.container()
-loginSection = st.container()
-logOutSection = st.container()
+header_section = st.container()
+main_section = st.container()
+login_section = st.container()
+logout_section = st.container()
 
 
 def get_html_with_age_gate_bypass(url: str) -> bytes:
@@ -335,16 +337,19 @@ def insert_into_subscription(user_id, product_id, notification_price):
         return None
 
 
-def insert_initial_price(price, product_id):
+def insert_initial_price(price, product_id) -> None:
     """Inserts initial price data into the price_changes table"""
     conn = get_connection()
     cursor = get_cursor(conn)
     try:
         cursor.execute(
             """INSERT INTO price_changes (price, product_id, timestamp) VALUES (%s, %s, %s);""",
-            (price, product_id, timestamp))
+            (price, product_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        cursor.close()
+        conn.commit()
+        conn.close()
     except Exception as e:
-        st.error(f"Error inserting into the database (subscription): {e}")
+        st.error(f"Error inserting into the database (price_changes): {e}")
         return None
 
 
@@ -353,6 +358,9 @@ def track_product(user_id, url, notification_price):
     website_id = insert_into_website(get_website_from_url(url))
     product_id = insert_into_product(website_id, url)
     insert_into_subscription(user_id, product_id, notification_price)
+    price = (scrape_from_html(get_html_from_url(url), url)).get(
+        "discount_price")
+    insert_initial_price(clean_price(price), product_id)
     st.toast("New product successfully tracked!")
 
 
@@ -373,45 +381,56 @@ def stop_tracking_product(user_id, product_id):
 
 def show_main_page():
     """Displays the main page on the dashboard"""
-    with mainSection:
+    with main_section:
+        with st.sidebar:
+            page = option_menu(
+                menu_title="Menu", options=["About", "Current products", "Track new products", "Unsubscribe from product tracking"])
         user_id = st.session_state.get('user_id')
-        st.header("Track a new product")
-        url = st.text_input("Enter a new product URL: ")
-        notification_price = st.text_input(
-            label="Enter the price threshold to receive email notifications about price drops: ")
-        st.button("Track", on_click=track_clicked,
-                  args=(user_id, url, notification_price))
-        st.header("Current products")
-        for product_id in get_product_subscription(user_id):
-            product_name, url, original_price = get_product_info(product_id)
-            latest_price = get_latest_price(product_id)
-            st.subheader(f"{product_name}")
-            st.markdown(f"""Current price: £{latest_price}""")
-            st.markdown(f"""Original price: £{original_price}""")
-            st.markdown(f"""Link: {url}""")
-            st.altair_chart(display_charts(product_id))
+        if page == "About":
+            st.header("About")
+            st.markdown("Price Tracker")
+        elif page == "Current products":
+            st.header("Current products")
+            for product_id in get_product_subscription(user_id):
+                product_name, url, original_price = get_product_info(
+                    product_id)
+                latest_price = get_latest_price(product_id)
+                st.subheader(f"{product_name}")
+                st.markdown(f"""Current price: £{latest_price}""")
+                st.markdown(f"""Original price: £{original_price}""")
+                st.markdown(f"""Link: {url}""")
+                st.altair_chart(display_charts(product_id))
+        elif page == "Track new products":
+            st.header("Track a new product")
+            url = st.text_input("Enter a new product URL: ")
+            notification_price = st.text_input(
+                label="Enter the price threshold to receive email notifications about price drops: ")
+            st.button("Track", on_click=track_clicked,
+                      args=(user_id, url, notification_price))
+        elif page == "Unsubscribe from product tracking":
+            ...
 
 
 def LoggedOut_Clicked() -> None:
     """Changes logged in state to false"""
-    st.session_state['loggedIn'] = False
+    st.session_state['logged_in'] = False
 
 
 def show_logout_page() -> None:
     """Displays logout page"""
-    loginSection.empty()
-    with logOutSection:
+    login_section.empty()
+    with logout_section:
         st.button("Log Out", key="logout", on_click=LoggedOut_Clicked)
 
 
 def login_clicked(email, password) -> None:
     """Logins into account"""
     if login(email, password):
-        st.session_state['loggedIn'] = True
+        st.session_state['logged_in'] = True
         st.session_state['user_id'] = get_user_id(email)
         st.toast("Login successful!")
     else:
-        st.session_state['loggedIn'] = False
+        st.session_state['logged_in'] = False
         st.error("Invalid user name or password")
 
 
@@ -419,13 +438,13 @@ def create_account_clicked(first_name, last_name, new_email, new_password) -> No
     """Verifies new account details and changes logged in state"""
     if not first_name or not last_name or not new_email or not new_password:
         st.error("All fields are required to create an account.")
-        st.session_state['loggedIn'] = False
+        st.session_state['logged_in'] = False
     elif create_account(first_name, last_name, new_email, new_password):
-        st.session_state['loggedIn'] = True
+        st.session_state['logged_in'] = True
         st.session_state['user_id'] = get_user_id(new_email)
         st.toast("Account successfully created!")
     else:
-        st.session_state['loggedIn'] = False
+        st.session_state['logged_in'] = False
         st.error("Error occurred when creating account")
 
 
@@ -439,8 +458,8 @@ def track_clicked(user_id, url, notification_price) -> None:
 
 def show_login_page() -> None:
     """Displays streamlit main page"""
-    with loginSection:
-        if st.session_state['loggedIn'] == False:
+    with login_section:
+        if st.session_state['logged_in'] == False:
 
             # Login to an existing account
 
@@ -468,14 +487,14 @@ def show_login_page() -> None:
 
 
 if __name__ == "__main__":
-    with headerSection:
+    with header_section:
         st.title("Sales Tracker")
 
-        if 'loggedIn' not in st.session_state:
-            st.session_state['loggedIn'] = False
+        if 'logged_in' not in st.session_state:
+            st.session_state['logged_in'] = False
             show_login_page()
         else:
-            if st.session_state['loggedIn']:
+            if st.session_state['logged_in']:
                 show_logout_page()
                 show_main_page()
             else:

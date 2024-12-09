@@ -8,7 +8,7 @@ import streamlit as st
 import requests
 import psycopg2
 from bs4 import BeautifulSoup
-from streamlit_graphs import get_connection, get_cursor
+from database_connection import get_connection, get_cursor
 from streamlit_option_menu import option_menu
 
 headerSection = st.container()
@@ -413,7 +413,7 @@ def show_main_page():
 
 def LoggedOut_Clicked() -> None:
     """Changes logged in state to false"""
-    st.session_state['loggedIn'] = False
+    st.session_state['logged_in'] = False
 
 
 def show_logout_page() -> None:
@@ -426,11 +426,11 @@ def show_logout_page() -> None:
 def login_clicked(email, password) -> None:
     """Logins into account"""
     if login(email, password):
-        st.session_state['loggedIn'] = True
+        st.session_state['logged_in'] = True
         st.session_state['user_id'] = get_user_id(email)
         st.toast("Login successful!")
     else:
-        st.session_state['loggedIn'] = False
+        st.session_state['logged_in'] = False
         st.error("Invalid user name or password")
 
 
@@ -438,13 +438,13 @@ def create_account_clicked(first_name, last_name, new_email, new_password) -> No
     """Verifies new account details and changes logged in state"""
     if not first_name or not last_name or not new_email or not new_password:
         st.error("All fields are required to create an account.")
-        st.session_state['loggedIn'] = False
+        st.session_state['logged_in'] = False
     elif create_account(first_name, last_name, new_email, new_password):
-        st.session_state['loggedIn'] = True
+        st.session_state['logged_in'] = True
         st.session_state['user_id'] = get_user_id(new_email)
         st.toast("Account successfully created!")
     else:
-        st.session_state['loggedIn'] = False
+        st.session_state['logged_in'] = False
         st.error("Error occurred when creating account")
 
 
@@ -459,7 +459,7 @@ def track_clicked(user_id, url, notification_price) -> None:
 def show_login_page() -> None:
     """Displays streamlit main page"""
     with loginSection:
-        if st.session_state['loggedIn'] == False:
+        if st.session_state['logged_in'] == False:
 
             # Login to an existing account
 
@@ -490,11 +490,11 @@ if __name__ == "__main__":
     with headerSection:
         st.title("Sales Tracker")
 
-        if 'loggedIn' not in st.session_state:
-            st.session_state['loggedIn'] = False
+        if 'logged_in' not in st.session_state:
+            st.session_state['logged_in'] = False
             show_login_page()
         else:
-            if st.session_state['loggedIn']:
+            if st.session_state['logged_in']:
                 show_logout_page()
                 show_main_page()
             else:

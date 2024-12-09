@@ -71,6 +71,7 @@ def main_remove_subscriptions() -> None:
 
 def lambda_handler(event, context):
     """Lambda handler function """
+    load_dotenv()
     logging.info("Attempting to remove subscriptions at: ", datetime.now())
     try:
         main_remove_subscriptions()

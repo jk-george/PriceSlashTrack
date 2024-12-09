@@ -21,6 +21,6 @@ resource "aws_ecr_repository" "ecr_for_dashboard" {
 # ECR Repository for Subscription removal Container Image
 
 resource "aws_ecr_repository" "c14-price-slash-subscription-checker" {
-  name = "c14-price-slash-subscription-checker-repo"
+  name = "c14-priceslashers-subscription-checker-repo"
   force_delete = true
 }

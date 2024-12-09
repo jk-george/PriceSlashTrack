@@ -1,4 +1,6 @@
-FROM python:3.12
+FROM public.ecr.aws/lambda/python:3.12
+
+WORKDIR ${LAMBDA_TASK_ROOT}
 
 COPY remove_subscribers_requirements.txt ${LAMBDA_TASK_ROOT}
 

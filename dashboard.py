@@ -11,10 +11,10 @@ from bs4 import BeautifulSoup
 from database_connection import get_connection, get_cursor
 from streamlit_option_menu import option_menu
 
-headerSection = st.container()
-mainSection = st.container()
-loginSection = st.container()
-logOutSection = st.container()
+header_section = st.container()
+main_section = st.container()
+login_section = st.container()
+logout_section = st.container()
 
 
 def get_html_with_age_gate_bypass(url: str) -> bytes:
@@ -381,7 +381,7 @@ def stop_tracking_product(user_id, product_id):
 
 def show_main_page():
     """Displays the main page on the dashboard"""
-    with mainSection:
+    with main_section:
         with st.sidebar:
             page = option_menu(
                 menu_title="Menu", options=["About", "Current products", "Track new products", "Unsubscribe from product tracking"])
@@ -418,8 +418,8 @@ def LoggedOut_Clicked() -> None:
 
 def show_logout_page() -> None:
     """Displays logout page"""
-    loginSection.empty()
-    with logOutSection:
+    login_section.empty()
+    with logout_section:
         st.button("Log Out", key="logout", on_click=LoggedOut_Clicked)
 
 
@@ -458,7 +458,7 @@ def track_clicked(user_id, url, notification_price) -> None:
 
 def show_login_page() -> None:
     """Displays streamlit main page"""
-    with loginSection:
+    with login_section:
         if st.session_state['logged_in'] == False:
 
             # Login to an existing account
@@ -487,7 +487,7 @@ def show_login_page() -> None:
 
 
 if __name__ == "__main__":
-    with headerSection:
+    with header_section:
         st.title("Sales Tracker")
 
         if 'logged_in' not in st.session_state:

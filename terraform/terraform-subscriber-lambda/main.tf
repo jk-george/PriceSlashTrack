@@ -1,9 +1,3 @@
-# ECR Repository
-
-resource "aws_ecr_repository" "c14-price-slash-subscription-checker" {
-  name = "c14-price-slash-subscription-checker"
-}
-
 # IAM role for Lambda function
 
 resource "aws_iam_role" "c14-price-slash-lambda-execution-role" {
@@ -34,7 +28,7 @@ resource "aws_iam_policy_attachment" "c14-price-slash-lambda-policy-attachment" 
 # Lambda Function for Subscription Checker
 resource "aws_lambda_function" "c14-price-slash-subscription-checker" {
   function_name = "c14-price-slash-subscription-checker"
-  image_uri     = "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c14-price-slash-subscription-checker-repo:latest"
+  image_uri     = var.IMAGE_URI
   role          = aws_iam_role.c14-price-slash-lambda-execution-role.arn
   package_type  = "Image"
   timeout       = 900
@@ -42,15 +36,16 @@ resource "aws_lambda_function" "c14-price-slash-subscription-checker" {
 
   environment {
     variables = {
-      DB_HOST     = aws_db_instance.c14-price_slash_db.endpoint
+      DB_HOST     = var.DB_HOST
       DB_NAME     = var.DB_NAME
       DB_USER     = var.DB_USER
       DB_PASSWORD = var.DB_PASSWORD
+      DB_PORT     = var.DB_PORT
     }
   }
 
   image_config {
-    command = ["lambda_function.lambda_handler"] # This will need to be changed later once lambda code has been written
+    command = ["remove_subscribers.lambda_handler"] # This will need to be changed later once lambda code has been written
   }
 }
 

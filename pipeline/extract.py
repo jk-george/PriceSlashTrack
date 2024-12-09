@@ -72,8 +72,8 @@ def get_html_from_url(web_page: str) -> bytes:
         return "Cannot connect to that URL."
     if html.status_code > 299 or html.status_code < 200:
         logging.error(
-            f"Issue with provided web_page: HTML Status Code - {html.status_code}")
-        return f"Error: Something went wrong when trying to reach your webpage."
+            "Issue with provided web_page: HTML Status Code - %s", html.status_code)
+        return "Error: Something went wrong when trying to reach your webpage."
     return html.content
 
 
@@ -92,7 +92,7 @@ def scrape_pricing_process(html_content: bytes, url: str, product_id: int) -> di
 
     website_url = get_website_from_url(url)
 
-    if "https://store.steampowered.com/" in url:
+    if "https://store.steampowered.com/" in website_url:
         return scrape_from_steam_html(html_content, url, product_id)
 
     if "https://www.amazon.co" in url:
@@ -103,14 +103,8 @@ def scrape_pricing_process(html_content: bytes, url: str, product_id: int) -> di
     return
 
 
-def scrape_from_amazon_html(html_content, url, product_id):
-    """ Scrapes from html to get a dictionary with the:
-    - Product_ID 
-    - product_name
-    - original_price
-    - discount_price
-    - website 
-    for Amazon Product Pages."""
+def scrape_from_amazon_html(html_content: bytes, url: str, product_id: int) -> dict:
+    """Scrapes product, price and website information from Amazon."""
     s = BeautifulSoup(html_content, 'html.parser')
 
     results = s.find("div", id="corePriceDisplay_desktop_feature_div")
@@ -119,34 +113,29 @@ def scrape_from_amazon_html(html_content, url, product_id):
         logging.error("Can't scrape from Amazon URL")
         return None
 
-    game_title_elem = s.find(id="productTitle")
+    product_title_element = s.find(id="productTitle")
 
-    if not game_title_elem:
+    if not product_title_element:
         logging.error("Cannot find game title on the page for URL: %s", url)
         return None
 
     discount_price = results.find(
         "span", class_="a-price aok-align-center reinventPricePriceToPayMargin priceToPay").text
     original_price = results.find(
-        "div", class_="a-section a-spacing-small aok-align-center").find("span", class_="a-offscreen").text
-    game_title = game_title_elem.text.strip()
+        "div",
+        class_="a-section a-spacing-small aok-align-center").find("span", class_="a-offscreen").text
+    product_title = product_title_element.text.strip()
 
     product_information = {"product_id": product_id,
                            "original_price": original_price,
                            "discount_price": discount_price,
-                           "game_title": game_title,
+                           "game_title": product_title,
                            "website": get_website_from_url(url)}
     return product_information
 
 
 def scrape_from_steam_html(html_content: bytes, url: str, product_id: int) -> dict:
-    """ Scrapes from html to get a dictionary with the:
-    - Product_ID 
-    - product_name
-    - original_price
-    - discount_price
-    - website 
-    for STEAM Games/Products."""
+    """Scrapes product, price and website information from Steam."""
     s = BeautifulSoup(html_content, 'html.parser')
 
     results = s.find(id="game_area_purchase")
@@ -159,15 +148,15 @@ def scrape_from_steam_html(html_content: bytes, url: str, product_id: int) -> di
         "div", class_="discount_original_price")
     discount_price_elem = results.find(
         "div", class_="discount_final_price")
-    game_title_elem = s.find(
+    game_title_element = s.find(
         id="appHubAppName", class_="apphub_AppName")
     regular_price_elem = s.find("div", class_="game_purchase_price price", attrs={
                                 "data-price-final": True})
 
-    if not game_title_elem:
+    if not game_title_element:
         logging.error("Cannot find product title on the page for URL: %s", url)
         return None
-    game_title = game_title_elem.text.strip()
+    game_title = game_title_element.text.strip()
 
     if original_price_elem and discount_price_elem:
         original_price = original_price_elem.text.strip() if original_price_elem else "N/A"

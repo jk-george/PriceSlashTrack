@@ -391,15 +391,18 @@ def show_main_page():
             st.markdown("Price Tracker")
         elif page == "Current products":
             st.header("Current products")
-            for product_id in get_product_subscription(user_id):
-                product_name, url, original_price = get_product_info(
-                    product_id)
-                latest_price = get_latest_price(product_id)
-                st.subheader(f"{product_name}")
-                st.markdown(f"""Current price: £{latest_price}""")
-                st.markdown(f"""Original price: £{original_price}""")
-                st.markdown(f"""Link: {url}""")
-                st.altair_chart(display_charts(product_id))
+            if not get_product_subscription(user_id):
+                st.markdown("You are not currently tracking anything!")
+            else:
+                for product_id in get_product_subscription(user_id):
+                    product_name, url, original_price = get_product_info(
+                        product_id)
+                    latest_price = get_latest_price(product_id)
+                    st.subheader(f"{product_name}")
+                    st.markdown(f"""Current price: £{latest_price}""")
+                    st.markdown(f"""Original price: £{original_price}""")
+                    st.markdown(f"""Link: {url}""")
+                    st.altair_chart(display_charts(product_id))
         elif page == "Track new products":
             st.header("Track a new product")
             url = st.text_input("Enter a new product URL: ")
@@ -408,7 +411,29 @@ def show_main_page():
             st.button("Track", on_click=track_clicked,
                       args=(user_id, url, notification_price))
         elif page == "Unsubscribe from product tracking":
-            ...
+            st.header("Unsubscribe from product tracking")
+            products_tracked = {}
+            if not get_product_subscription(user_id):
+                st.markdown("You are not currently tracking anything!")
+            else:
+                for product_id in get_product_subscription(user_id):
+                    product_name, url, original_price = get_product_info(
+                        product_id)
+                    products_tracked[product_name] = product_id
+
+                selected_products = st.multiselect(
+                    "Select products you wish to untrack:",
+                    options=list(products_tracked.keys()))
+                if st.button("Unsubscribe from selected products"):
+                    if not selected_products:
+                        st.warning(
+                            "Please select at least one product to unsubscribe.")
+                    else:
+                        for product_name in selected_products:
+                            stop_tracking_product(
+                                user_id, products_tracked[product_name])
+                        st.toast(f"""You unsubscribed from tracking: {
+                            ', '.join(selected_products)}""")
 
 
 def LoggedOut_Clicked() -> None:

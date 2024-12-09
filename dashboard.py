@@ -259,98 +259,64 @@ def login(email: str, password: str) -> bool:
         return False
 
 
-def create_account(first_name, last_name, new_email, new_password) -> bool:
-    """Adds new user data to database"""
-    conn = get_connection()
-    cursor = get_cursor(conn)
+def execute_query(query: str, params: tuple, fetch_id_func=None):
+    """Executes a database query with optional ID fetching."""
     try:
-        query = """INSERT INTO users (first_name, last_name, email_address, password)
-        VALUES (%s, %s, %s, %s);"""
-        cursor.execute(query, (first_name, last_name, new_email, new_password))
+        conn = get_connection()
+        cursor = get_cursor(conn)
+        if fetch_id_func and fetch_id_func(*params):
+            return fetch_id_func(*params)
+        cursor.execute(query, params)
         cursor.close()
         conn.commit()
         conn.close()
+        if fetch_id_func:
+            return fetch_id_func(*params)
         return True
     except Exception as e:
-        st.error(f"Error inserting into the database (users): {e}")
-        return False
+        st.error(f"Database operation failed: {e}")
+        return None
+
+
+def create_account(first_name, last_name, new_email, new_password) -> bool:
+    """Adds new user data to database."""
+    query = """INSERT INTO users (first_name, last_name, email_address, password) 
+               VALUES (%s, %s, %s, %s);"""
+    return execute_query(query, (first_name, last_name, new_email, new_password))
 
 
 def insert_into_website(website: str) -> int:
-    """Inserts new websites into the website table and returns the corresponding website id"""
-    try:
-        conn = get_connection()
-        cursor = get_cursor(conn)
-        if get_website_id(website):
-            return get_website_id(website)
-        else:
-            cursor.execute(
-                "INSERT INTO website (website_name) VALUES (%s);", (website,))
-            cursor.close()
-            conn.commit()
-            conn.close()
-            return get_website_id(website)
-    except Exception as e:
-        st.error(f"Error inserting into the database (website): {e}")
-        return None
+    """Inserts a new website or retrieves its ID."""
+    query = "INSERT INTO website (website_name) VALUES (%s);"
+    return execute_query(query, (website,), fetch_id_func=get_website_id)
 
 
 def insert_into_product(website_id: int, url: str) -> int:
-    """Inserts new products into the product table and returns the corresponding product id"""
+    """Inserts a new product or retrieves its ID."""
     product_info = scrape_from_html(get_html_from_url(url), url)
-    try:
-        conn = get_connection()
-        cursor = get_cursor(conn)
-        if get_product_id(url):
-            return get_product_id(url)
-        else:
-            cursor.execute(
-                """INSERT INTO product (product_name, url, website_id, original_price) VALUES (%s, %s, %s, %s);""",
-                (product_info.get("game_title"), url, website_id,
-                 clean_price(product_info.get("original_price")),))
-            cursor.close()
-            conn.commit()
-            conn.close()
-            return get_product_id(url)
-    except Exception as e:
-        st.error(f"Error inserting into the database (product): {e}")
-        return None
+    query = """INSERT INTO product (product_name, url, website_id, original_price) 
+               VALUES (%s, %s, %s, %s);"""
+    return execute_query(
+        query,
+        (product_info.get("game_title"), url, website_id,
+         clean_price(product_info.get("original_price"))),
+        fetch_id_func=get_product_id
+    )
 
 
 def insert_into_subscription(user_id, product_id, notification_price):
-    """Inserts new subscriptions into the subscription table and returns the corresponding product id"""
-    try:
-        conn = get_connection()
-        cursor = get_cursor(conn)
-        if get_subscription_id(user_id, product_id):
-            return get_subscription_id(user_id, product_id)
-        else:
-            cursor.execute(
-                """INSERT INTO subscription (user_id, product_id, notification_price) VALUES (%s, %s, %s);""",
-                (user_id, product_id, notification_price,))
-            cursor.close()
-            conn.commit()
-            conn.close()
-            return get_subscription_id(user_id, product_id)
-    except Exception as e:
-        st.error(f"Error inserting into the database (subscription): {e}")
-        return None
+    """Inserts a new subscription or retrieves its ID."""
+    query = """INSERT INTO subscription (user_id, product_id, notification_price) 
+               VALUES (%s, %s, %s);"""
+    return execute_query(query, (user_id, product_id, notification_price), fetch_id_func=get_subscription_id)
 
 
 def insert_initial_price(price, product_id) -> None:
-    """Inserts initial price data into the price_changes table"""
-    conn = get_connection()
-    cursor = get_cursor(conn)
-    try:
-        cursor.execute(
-            """INSERT INTO price_changes (price, product_id, timestamp) VALUES (%s, %s, %s);""",
-            (price, product_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-        cursor.close()
-        conn.commit()
-        conn.close()
-    except Exception as e:
-        st.error(f"Error inserting into the database (price_changes): {e}")
-        return None
+    """Inserts initial price data into the price_changes table."""
+    query = """INSERT INTO price_changes (price, product_id, timestamp) 
+               VALUES (%s, %s, %s);"""
+    execute_query(query, (price, product_id,
+                  datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
 
 def track_product(user_id, url, notification_price):

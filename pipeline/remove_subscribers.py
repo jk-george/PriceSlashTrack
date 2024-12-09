@@ -72,12 +72,15 @@ def main_remove_subscriptions() -> None:
 def lambda_handler(event, context):
     """Lambda handler function """
     load_dotenv()
-    logging.info("Attempting to remove subscriptions at: ", datetime.now())
+    logging.info(f"Attempting to remove subscriptions at: {datetime.now()}.")
+    if event or context:
+        print("Event Triggered.")
     try:
         main_remove_subscriptions()
         return {"status_code": 200, "message": "Successfully removed subscribers."}
     except:
-        return {"status_code": 500, "message": "Execution of subscription removal process was not successful."}
+        return {"status_code": 500,
+                "message": "Execution of subscription removal process was not successful."}
 
 
 if __name__ == "__main__":

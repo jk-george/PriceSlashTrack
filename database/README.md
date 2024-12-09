@@ -20,7 +20,7 @@ DB_PASSWORD=<the-rds-password>
 
 2. Initialise the database using:
 ```bash
-Could move the connect.sh file into this folder and create another shell script for seeding the database?
+bash connect.sh
 ```
 
 ### ✨ Using test data (**Optional**)
@@ -28,9 +28,11 @@ Fake test data on users, products, prices, and subscriptions can be used. This i
 
 Seed the database with test data using:
 ```bash
-Potential seeding shell script?
+bash seed_test_data.sh
 ```
 
 ## 📁 Files
 - `schema.sql` defines the database schema using SQL.
 - `test_database.sql` contains fake data that can be inserted for the sake of testing and validation.
+- `connect.sh` can be used to connect to the database.
+- `seed_test_data.sh` is used to seed the database with test data.

@@ -59,7 +59,7 @@ def test_load_price_changes_empty():
 
 @patch("load.insert_price_change")
 def test_load_price_changes_partial_failure(mock_insert_price_change):
-    """Combination of valid and invalid data insertion """
+    """Combination of valid and invalid data insertion results ."""
     mock_conn = MagicMock()
     mock_insert_price_change.side_effect = [None, Exception("Database error")]
 

@@ -2,7 +2,7 @@ variable "DB_NAME" {
     type = string
 }
 
-variable "DB_USERNAME" {
+variable "DB_USER" {
     type = string
 }
 

@@ -44,7 +44,7 @@ resource "aws_lambda_function" "c14-price-slash-subscription-checker" {
     variables = {
       DB_HOST     = aws_db_instance.c14-price_slash_db.endpoint
       DB_NAME     = var.DB_NAME
-      DB_USER     = var.DB_USERNAME
+      DB_USER     = var.DB_USER
       DB_PASSWORD = var.DB_PASSWORD
     }
   }

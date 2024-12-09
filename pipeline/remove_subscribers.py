@@ -1,9 +1,11 @@
 """Removing products data that no longer have active subscriptions in the RDS database."""
 import logging
 from datetime import datetime
+
 from psycopg2.extensions import connection
 from psycopg2.extras import DictCursor
 from dotenv import load_dotenv
+
 from connect_to_database import configure_logging, get_connection
 
 

@@ -486,8 +486,23 @@ def create_account_clicked(first_name, last_name, new_email, new_password) -> No
 
 def track_clicked(user_id, url, notification_price) -> None:
     """Tracks product"""
+    error_present = False
     if not url or not notification_price:
         st.error("All fields are required to track a product.")
+        error_present = True
+    elif not scrape_from_html(get_html_from_url(url), url):
+        st.error("Cannot fetch data from that link.")
+        error_present = True
+    try:
+        notification_price = float(notification_price)
+        if notification_price <= 0:
+            st.error("Notification price must be a positive number.")
+            error_present = True
+    except ValueError:
+        st.error("Notification price must be a valid number.")
+        error_present = True
+    if error_present:
+        return None
     else:
         track_product(user_id, url, notification_price)
 

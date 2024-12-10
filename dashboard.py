@@ -134,10 +134,24 @@ def scrape_from_steam_html(html_content: bytes, url: str) -> dict:
     regular_price_element = s.find("div", class_="game_purchase_price price", attrs={
         "data-price-final": True})
 
+    image_element = s.find("img", class_="game_header_image_full")
+
+    description_element = s.find("div", class_="game_description_snippet")
+
     if not game_title_element:
         logging.error("Cannot find product title on the page for URL: %s", url)
         return None
     game_title = game_title_element.text.strip()
+
+    if image_element:
+        game_image = image_element['src']
+    else:
+        game_image = None
+
+    if description_element:
+        game_description = description_element.text.strip()
+    else:
+        game_description = f"Description of {game_title} not found."
 
     if original_price_element and discount_price_element:
         original_price = original_price_element.text.strip(
@@ -155,6 +169,8 @@ def scrape_from_steam_html(html_content: bytes, url: str) -> dict:
         "original_price": original_price,
         "discount_price": discount_price,
         "game_title": game_title,
+        "game_image": game_image,
+        "game_description": game_description,
         "website": get_website_from_url(url)}
 
     return product_information

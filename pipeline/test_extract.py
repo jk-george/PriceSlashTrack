@@ -33,7 +33,7 @@ def test_url_is_not_valid_returns_error_message():
 @pytest.fixture
 def html_object():
     """Fixture that creates a test html string of a game called The Planet Crafter"""
-    with open("./test_extract_html.txt", "r", encoding="UTF-8") as test_file:
+    with open("test_extract_html.txt", "r", encoding="UTF-8") as test_file:
         html_string = test_file.read()
     return html_string
 

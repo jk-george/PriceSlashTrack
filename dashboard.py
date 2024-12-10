@@ -71,10 +71,12 @@ def get_website_from_url(url: str) -> str:
 def scrape_pricing_process(html_content: bytes, url: str) -> dict:
     """ Chooses which scraper to use based off of the URL """
 
-    if "https://store.steampowered.com/" in url:
+    website_url = get_website_from_url(url)
+
+    if "https://store.steampowered.com" in website_url:
         return scrape_from_steam_html(html_content, url)
 
-    if "https://www.amazon.com" in url or "https://www.amazon.co." in url:
+    if "https://www.amazon.com" in url or "https://www.amazon.co." in website_url:
         return scrape_from_amazon_html(html_content, url)
 
     logging.error(

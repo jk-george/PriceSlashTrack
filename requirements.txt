@@ -3,7 +3,10 @@ requests
 pytest
 pylint
 python-dotenv
-psycopg2
 psycopg2-binary
 pandas
 boto3
+streamlit
+pandas
+altair
+streamlit-option-menu

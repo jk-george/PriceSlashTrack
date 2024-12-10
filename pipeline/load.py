@@ -21,6 +21,16 @@ def insert_price_change(conn: connection, product_id: int, price: float, timesta
         logging.error("Error inserting price: %s", e)
 
 
+def product_id_exists(conn: connection, product_id: int) -> bool:
+    """Checks products table to see if product_id exists."""
+    with conn.cursor() as db_cursor:
+        db_cursor.execute(
+            "SELECT * FROM product WHERE product_id = %s", (product_id,))
+        if db_cursor.fetchone():
+            return True
+        return False
+
+
 def load_price_changes(products_data: list[dict], conn: connection) -> None:
     """Loads cleaned price data into database."""
     successfully_inserted = 0
@@ -28,6 +38,12 @@ def load_price_changes(products_data: list[dict], conn: connection) -> None:
     for product in products_data:
         if not all(key in product for key in ["product_id", "price", "timestamp"]):
             logging.error("Invalid product values: %s", product)
+            continue
+
+        if product["price"] < 0:
+            continue
+
+        if not product_id_exists(conn, product["product_id"]):
             continue
 
         insert_price_change(

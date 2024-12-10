@@ -22,7 +22,7 @@ CREATE TABLE website (
 
 CREATE TABLE product (
     product_id INT GENERATED ALWAYS AS IDENTITY,
-    product_name VARCHAR(100) NOT NULL,
+    product_name VARCHAR(250) NOT NULL,
     url VARCHAR(2048) NOT NULL UNIQUE,
     website_id INT NOT NULL,
     original_price FLOAT NOT NULL,

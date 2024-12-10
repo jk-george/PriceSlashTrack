@@ -68,49 +68,94 @@ def get_website_from_url(url: str) -> str:
     return website_url
 
 
-def scrape_from_html(html_content: bytes, url: str) -> dict:
-    """ Scrapes from html to get a dictionary with the:
-    - product_name
-    - original_price
-    - discount_price
-    - website
-    """
+def scrape_pricing_process(html_content: bytes, url: str) -> dict:
+    """ Chooses which scraper to use based off of the URL """
+
+    website_url = get_website_from_url(url)
+
+    if "https://store.steampowered.com" in website_url:
+        return scrape_from_steam_html(html_content, url)
+
+    if "https://www.amazon.com" in url or "https://www.amazon.co." in website_url:
+        return scrape_from_amazon_html(html_content, url)
+
+    logging.error(
+        "Cannot scrape that URL, since it's not an Amazon/Steam webpage.")
+    return
+
+
+def scrape_from_amazon_html(html_content: bytes, url: str) -> dict:
+    """Scrapes product, price and website information from Amazon."""
+    s = BeautifulSoup(html_content, 'html.parser')
+
+    results = s.find("div", id="corePriceDisplay_desktop_feature_div")
+
+    if not results:
+        logging.error("Can't scrape from Amazon URL")
+        return None
+
+    product_title_element = s.find(id="productTitle")
+
+    if not product_title_element:
+        logging.error("Cannot find game title on the page for URL: %s", url)
+        return None
+
+    discount_price = results.find(
+        "div", class_="a-section a-spacing-none aok-align-center aok-relative").find("span", class_="aok-offscreen").text
+    original_price = results.find(
+        "div",
+        class_="a-section a-spacing-small aok-align-center").find("span", class_="a-offscreen").text
+    product_title = product_title_element.text.strip()
+
+    product_information = {
+        "original_price": original_price,
+        "discount_price": discount_price,
+        "game_title": product_title,
+        "website": get_website_from_url(url)}
+    return product_information
+
+
+def scrape_from_steam_html(html_content: bytes, url: str) -> dict:
+    """Scrapes product, price and website information from Steam."""
     s = BeautifulSoup(html_content, 'html.parser')
 
     results = s.find(id="game_area_purchase")
 
     if not results:
-        logging.error("Can't scrape that URL.")
+        logging.error("Can't scrape that Steam URL.")
         return None
 
-    original_price_elem = results.find(
+    original_price_element = results.find(
         "div", class_="discount_original_price")
-    discount_price_elem = results.find(
+    discount_price_element = results.find(
         "div", class_="discount_final_price")
-    game_title_elem = s.find(
+    game_title_element = s.find(
         id="appHubAppName", class_="apphub_AppName")
-    regular_price_elem = s.find("div", class_="game_purchase_price price", attrs={
-                                "data-price-final": True})
+    regular_price_element = s.find("div", class_="game_purchase_price price", attrs={
+        "data-price-final": True})
 
-    if not game_title_elem:
-        logging.error("Cannot find game title on the page for URL: %s", url)
+    if not game_title_element:
+        logging.error("Cannot find product title on the page for URL: %s", url)
         return None
-    game_title = game_title_elem.text.strip()
+    game_title = game_title_element.text.strip()
 
-    if original_price_elem and discount_price_elem:
-        original_price = original_price_elem.text.strip() if original_price_elem else "N/A"
-        discount_price = discount_price_elem.text.strip() if discount_price_elem else "N/A"
-    elif regular_price_elem:
-        original_price = regular_price_elem.text.strip()
+    if original_price_element and discount_price_element:
+        original_price = original_price_element.text.strip(
+        ) if original_price_element else "N/A"
+        discount_price = discount_price_element.text.strip(
+        ) if discount_price_element else "N/A"
+    elif regular_price_element:
+        original_price = regular_price_element.text.strip()
         discount_price = original_price
     else:
         original_price = "N/A"
         discount_price = "N/A"
 
-    product_information = {"original_price": original_price,
-                           "discount_price": discount_price,
-                           "game_title": game_title,
-                           "website": get_website_from_url(url)}
+    product_information = {
+        "original_price": original_price,
+        "discount_price": discount_price,
+        "game_title": game_title,
+        "website": get_website_from_url(url)}
 
     return product_information
 
@@ -297,7 +342,7 @@ def insert_into_website(website: str) -> int:
 
 def insert_into_product(website_id: int, url: str) -> int:
     """Inserts new products into the product table and returns the corresponding product id"""
-    product_info = scrape_from_html(get_html_from_url(url), url)
+    product_info = scrape_pricing_process(get_html_from_url(url), url)
     try:
         conn = get_connection()
         cursor = get_cursor(conn)
@@ -358,7 +403,7 @@ def track_product(user_id, url, notification_price):
     website_id = insert_into_website(get_website_from_url(url))
     product_id = insert_into_product(website_id, url)
     insert_into_subscription(user_id, product_id, notification_price)
-    price = (scrape_from_html(get_html_from_url(url), url)).get(
+    price = (scrape_pricing_process(get_html_from_url(url), url)).get(
         "discount_price")
     insert_initial_price(clean_price(price), product_id)
     st.toast("New product successfully tracked!")
@@ -490,7 +535,7 @@ def track_clicked(user_id, url, notification_price) -> None:
     if not url or not notification_price:
         st.error("All fields are required to track a product.")
         error_present = True
-    elif not scrape_from_html(get_html_from_url(url), url):
+    elif not scrape_pricing_process(get_html_from_url(url), url):
         st.error("Cannot fetch data from that link.")
         error_present = True
     try:

@@ -93,7 +93,7 @@ def scrape_pricing_process(html_content: bytes, url: str, product_id: int) -> di
     if "https://store.steampowered.com/" in url:
         return scrape_from_steam_html(html_content, url, product_id)
 
-    if "https://www.amazon.co" in url:
+    if "https://www.amazon.com" in url or "https://www.amazon.co." in url:
         return scrape_from_amazon_html(html_content, url, product_id)
 
     logging.error(
@@ -108,7 +108,7 @@ def scrape_from_amazon_html(html_content: bytes, url: str, product_id: int) -> d
     results = s.find("div", id="corePriceDisplay_desktop_feature_div")
 
     if not results:
-        logging.error("Can't scrape from Amazon URL")
+        logging.error("Can't scrape from that Amazon URL")
         return None
 
     product_title_element = s.find(id="productTitle")

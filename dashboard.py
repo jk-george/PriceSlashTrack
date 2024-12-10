@@ -74,7 +74,7 @@ def scrape_pricing_process(html_content: bytes, url: str) -> dict:
     if "https://store.steampowered.com/" in url:
         return scrape_from_steam_html(html_content, url)
 
-    if "https://www.amazon.co" in url:
+    if "https://www.amazon.com" in url or "https://www.amazon.co." in url:
         return scrape_from_amazon_html(html_content, url)
 
     logging.error(

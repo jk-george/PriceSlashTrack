@@ -366,7 +366,7 @@ def insert_into_product(website_id: int, url: str) -> int:
             return get_product_id(url)
         else:
             cursor.execute(
-                """INSERT INTO product (product_name, url, website_id, original_price) VALUES (%s, %s, %s, %s);""",
+                """INSERT INTO product (product_name, url, website_id, original_price, image_url, product_description) VALUES (%s, %s, %s, %s, %s, %s);""",
                 (product_info.get("game_title"), url, website_id,
                  clean_price(product_info.get("original_price")),))
             cursor.close()

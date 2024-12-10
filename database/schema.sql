@@ -26,6 +26,8 @@ CREATE TABLE product (
     url VARCHAR(2048) NOT NULL UNIQUE,
     website_id INT NOT NULL,
     original_price FLOAT NOT NULL,
+    product_description VARCHAR(2000),
+    image_url VARCHAR(2048),
     PRIMARY KEY (product_id),
     FOREIGN KEY (website_id) REFERENCES website(website_id)
 );

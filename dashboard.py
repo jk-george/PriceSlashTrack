@@ -391,18 +391,29 @@ def show_main_page():
             st.markdown("Price Tracker")
         elif page == "Current products":
             st.header("Current products")
-            if not get_product_subscription(user_id):
+            product_subscriptions = get_product_subscription(user_id)
+            if not product_subscriptions:
                 st.markdown("You are not currently tracking anything!")
             else:
-                for product_id in get_product_subscription(user_id):
+                product_options = {
+                    get_product_info(product_id)[0]: product_id for product_id in product_subscriptions
+                }
+
+                selected_product_name = st.selectbox(
+                    "Select a product to view details:",
+                    options=list(product_options.keys()),
+                    help="Choose a product to see its details")
+                if selected_product_name:
+                    selected_product_id = product_options[selected_product_name]
                     product_name, url, original_price = get_product_info(
-                        product_id)
-                    latest_price = get_latest_price(product_id)
+                        selected_product_id)
+                    latest_price = get_latest_price(selected_product_id)
+
                     st.subheader(f"{product_name}")
-                    st.markdown(f"""Current price: £{latest_price}""")
-                    st.markdown(f"""Original price: £{original_price}""")
-                    st.markdown(f"""Link: {url}""")
-                    st.altair_chart(display_charts(product_id))
+                    st.markdown(f"""**Current price:** £{latest_price}""")
+                    st.markdown(f"""**Original price:** £{original_price}""")
+                    st.markdown(f"""[**Link to product**]({url})""")
+                    st.altair_chart(display_charts(selected_product_id))
         elif page == "Track new products":
             st.header("Track a new product")
             url = st.text_input("Enter a new product URL: ")

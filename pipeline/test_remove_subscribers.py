@@ -1,3 +1,4 @@
+"""Unit Tests for removing subscribers script."""
 # pylint: skip-file
 import pytest
 from unittest.mock import Mock, patch

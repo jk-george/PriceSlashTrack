@@ -133,10 +133,8 @@ def check_and_notify() -> None:
                     continue
 
                 subject = f"Price Drop Alert: {product_name}"
-                body = (f"The price for {product_name} has dropped below your threshold of "
-                        f"{notification_price}! The current price is {
-                            current_price}. "
-                        "Hurry before this sale ends!")
+                body = (f"""The price for {product_name} has dropped below your threshold of {
+                        notification_price}! The current price is {current_price}. Hurry before this sale ends!""")
 
                 send_email(customer_email, subject, body)
 

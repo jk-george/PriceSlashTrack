@@ -135,7 +135,6 @@ def scrape_from_steam_html(html_content: bytes, url: str) -> dict:
         "data-price-final": True})
 
     image_element = s.find("img", class_="game_header_image_full")
-
     description_element = s.find("div", class_="game_description_snippet")
 
     if not game_title_element:
@@ -144,14 +143,14 @@ def scrape_from_steam_html(html_content: bytes, url: str) -> dict:
     game_title = game_title_element.text.strip()
 
     if image_element:
-        game_image = image_element['src']
+        image_url = image_element['src']
     else:
-        game_image = None
+        image_url = None
 
     if description_element:
-        game_description = description_element.text.strip()
+        product_description = description_element.text.strip()
     else:
-        game_description = f"Description of {game_title} not found."
+        product_description = "No description found."
 
     if original_price_element and discount_price_element:
         original_price = original_price_element.text.strip(
@@ -169,8 +168,8 @@ def scrape_from_steam_html(html_content: bytes, url: str) -> dict:
         "original_price": original_price,
         "discount_price": discount_price,
         "game_title": game_title,
-        "game_image": game_image,
-        "game_description": game_description,
+        "image_url": image_url,
+        "product_description": product_description,
         "website": get_website_from_url(url)}
 
     return product_information
@@ -440,6 +439,35 @@ def stop_tracking_product(user_id, product_id):
         return None
 
 
+def show_about_page():
+    """Displays the About page with project overview and instructions."""
+    st.header("📖 About")
+    st.markdown("""
+    🛒 **Welcome to Price Tracker!**
+
+    Price Tracker is a tool designed to help you monitor the prices of your favorite products, track price changes over time, and get notified when prices drop below your desired threshold. 
+
+    ### 🎯 Dashboard Features:
+    - **Current Products**: View the products you are tracking, their current prices, and price trends over time.
+    - **Track New Products**: Add a new product URL and set a price threshold to receive notifications about price drops.
+    - **Unsubscribe From Product Tracking**: Manage your tracked products by unsubscribing from the ones you no longer wish to monitor.
+
+    ### 🤝 How to Use:
+    1. **Log In or Create an Account**:
+        - If you are a returning user, log in with your email and password.
+        - New users can create an account by providing their details.
+    2. **Track a Product**:
+        - Navigate to **Track New Products**.
+        - Enter the product URL and set a notification price.
+    3. **Monitor Your Products**:
+        - Check **Current Products** to view the latest prices and trends.
+    4. **Unsubscribe**:
+        - Use **Unsubscribe From Product Tracking** to stop tracking products.
+
+    We hope this tool makes it easier for you to save money and stay informed about the best deals!
+    """)
+
+
 def show_main_page():
     """Displays the main page on the dashboard"""
     with main_section:
@@ -448,8 +476,7 @@ def show_main_page():
                 menu_title="Menu", options=["About", "Current products", "Track new products", "Unsubscribe from product tracking"])
         user_id = st.session_state.get('user_id')
         if page == "About":
-            st.header("About")
-            st.markdown("Price Tracker")
+            show_about_page()
         elif page == "Current products":
             st.header("Current products")
             product_subscriptions = get_product_subscription(user_id)

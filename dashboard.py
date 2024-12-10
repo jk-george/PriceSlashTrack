@@ -447,7 +447,7 @@ def show_main_page():
                             ', '.join(selected_products)}""")
 
 
-def LoggedOut_Clicked() -> None:
+def logged_out_clicked() -> None:
     """Changes logged in state to false"""
     st.session_state['logged_in'] = False
 
@@ -456,7 +456,7 @@ def show_logout_page() -> None:
     """Displays logout page"""
     login_section.empty()
     with logout_section:
-        st.button("Log Out", key="logout", on_click=LoggedOut_Clicked)
+        st.button("Log Out", key="logout", on_click=logged_out_clicked)
 
 
 def login_clicked(email, password) -> None:

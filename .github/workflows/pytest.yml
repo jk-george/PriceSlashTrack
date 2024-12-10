@@ -24,12 +24,7 @@ jobs:
             echo "No requirements.txt file found, skipping dependency installation."
           fi
       - name: Test with pytest
-        run: |
-          if [ -f pytest.ini ] || [ -f pyproject.toml ] || [ -d tests ]; then
-            coverage run -m pytest -v -s || echo "Tests failed or skipped."
-          else
-            echo "No test configuration or tests folder found, skipping pytest."
-          fi
+        run: pytest
       - name: Generate Coverage Report
         run: |
           if [ -f .coverage ]; then

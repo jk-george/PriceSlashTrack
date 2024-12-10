@@ -63,11 +63,21 @@ def test_load_price_changes_empty():
     mock_conn.rollback.assert_called_once()
 
 
+def multiple_insertion_side_effect(test_dict: dict):
+    """ specifically for the test below:  """
+    if test_dict['product_id'] == 8:
+        return None
+    else:
+        return Exception("Database Error")
+
+
+@patch("load.product_id_exists")
 @patch("load.insert_price_change")
-def test_load_price_changes_partial_failure(mock_insert_price_change):
+def test_load_price_changes_partial_failure(mock_insert_price_change, mock_product_id_exists):
     """Combination of valid and invalid data insertion """
     mock_conn = MagicMock()
-    mock_insert_price_change.side_effect = [None, Exception("Database error")]
+    mock_insert_price_change = Mock(side_effect=multiple_insertion_side_effect)
+    mock_product_id_exists.return_value = True
 
     test_data = [
         {'price': 22.49, 'product_id': 8, 'timestamp': '2024-12-04 16:31:40'},

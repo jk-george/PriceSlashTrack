@@ -90,9 +90,7 @@ def get_website_from_url(url: str) -> str:
 def scrape_pricing_process(html_content: bytes, url: str, product_id: int) -> dict:
     """ Chooses which scraper to use based off of the URL """
 
-    website_url = get_website_from_url(url)
-
-    if "https://store.steampowered.com/" in website_url:
+    if "https://store.steampowered.com/" in url:
         return scrape_from_steam_html(html_content, url, product_id)
 
     if "https://www.amazon.co" in url:
@@ -131,6 +129,7 @@ def scrape_from_amazon_html(html_content: bytes, url: str, product_id: int) -> d
                            "discount_price": discount_price,
                            "game_title": product_title,
                            "website": get_website_from_url(url)}
+    print(product_information)
     return product_information
 
 
@@ -175,7 +174,7 @@ def scrape_from_steam_html(html_content: bytes, url: str, product_id: int) -> di
                            "discount_price": discount_price,
                            "game_title": game_title,
                            "website": get_website_from_url(url)}
-
+    print(product_information)
     return product_information
 
 
@@ -202,4 +201,4 @@ def main_extraction_process() -> list[dict]:
 
 if __name__ == "__main__":
     load_dotenv()
-    print(main_extraction_process())
+    main_extraction_process()

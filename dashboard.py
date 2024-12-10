@@ -71,9 +71,7 @@ def get_website_from_url(url: str) -> str:
 def scrape_pricing_process(html_content: bytes, url: str) -> dict:
     """ Chooses which scraper to use based off of the URL """
 
-    website_url = get_website_from_url(url)
-
-    if "https://store.steampowered.com/" in website_url:
+    if "https://store.steampowered.com/" in url:
         return scrape_from_steam_html(html_content, url)
 
     if "https://www.amazon.co" in url:
@@ -101,7 +99,7 @@ def scrape_from_amazon_html(html_content: bytes, url: str) -> dict:
         return None
 
     discount_price = results.find(
-        "span", class_="a-price aok-align-center reinventPricePriceToPayMargin priceToPay").text
+        "div", class_="a-section a-spacing-none aok-align-center aok-relative").find("span", class_="aok-offscreen").text
     original_price = results.find(
         "div",
         class_="a-section a-spacing-small aok-align-center").find("span", class_="a-offscreen").text

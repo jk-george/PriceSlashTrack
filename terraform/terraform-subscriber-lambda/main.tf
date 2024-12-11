@@ -45,7 +45,7 @@ resource "aws_lambda_function" "c14-price-slash-subscription-checker" {
   }
 
   image_config {
-    command = ["remove_subscribers.lambda_handler"] # This will need to be changed later once lambda code has been written
+    command = ["remove_subscribers.lambda_handler"] 
   }
 }
 

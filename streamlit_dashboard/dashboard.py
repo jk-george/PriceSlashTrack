@@ -335,7 +335,6 @@ def display_charts(product_id) -> alt.Chart:
         filtered_df = df[df["Date"] >= (
             current_time - time_ranges[time_range])].copy()
 
-        # Include day, hour, and minute for this time range
         filtered_df.loc[:, 'FormattedDate'] = filtered_df['Date'].dt.strftime(
             '%Y-%m-%d %H:%M:%S')
 

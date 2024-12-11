@@ -1,3 +1,8 @@
+provider "aws" {
+  region = "eu-west-2"
+}
+
+
 data "aws_ecs_cluster" "c14-cluster" {
     cluster_name = "c14-ecs-cluster"
 }
@@ -118,7 +123,7 @@ resource "aws_security_group" "c14-price-slash-dashboard-sg" {
 
 resource "aws_ecs_service" "c14-price-slash-dashboard-service-tf" {
     name            = "c14-price-slash-dashboard-service-tf"
-    cluster         = data.aws_ecs_cluster.c14-cluster
+    cluster         = data.aws_ecs_cluster.c14-cluster.cluster_name
     task_definition = aws_ecs_task_definition.c14-price-slash-dashboard-task-def.arn
     desired_count   = 1
     launch_type     = "FARGATE" 

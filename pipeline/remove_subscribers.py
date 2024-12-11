@@ -1,8 +1,11 @@
 """Removing products data that no longer have active subscriptions in the RDS database."""
 import logging
+from datetime import datetime
+
 from psycopg2.extensions import connection
 from psycopg2.extras import DictCursor
 from dotenv import load_dotenv
+
 from connect_to_database import configure_logging, get_connection
 
 
@@ -64,6 +67,20 @@ def main_remove_subscriptions() -> None:
             logging.info("No unsubscribed products to remove.")
 
     logging.info("Connection to database successfully closed.")
+
+
+def lambda_handler(event, context):
+    """Lambda handler function """
+    load_dotenv()
+    logging.info(f"Attempting to remove subscriptions at: {datetime.now()}.")
+    if event or context:
+        print("Event Triggered.")
+    try:
+        main_remove_subscriptions()
+        return {"status_code": 200, "message": "Successfully removed subscribers."}
+    except:
+        return {"status_code": 500,
+                "message": "Execution of subscription removal process was not successful."}
 
 
 if __name__ == "__main__":

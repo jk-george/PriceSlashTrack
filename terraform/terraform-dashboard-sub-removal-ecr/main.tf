@@ -2,6 +2,7 @@ provider "aws" {
   region = "eu-west-2"
 }
 
+# ECR Repository for Dashboard Container Image
 
 resource "aws_ecr_repository" "ecr_for_dashboard" {
   name                 = var.DASHBOARD_ECR_NAME
@@ -14,4 +15,12 @@ resource "aws_ecr_repository" "ecr_for_dashboard" {
   lifecycle {
     prevent_destroy = false
   }
+}
+
+
+# ECR Repository for Subscription removal Container Image
+
+resource "aws_ecr_repository" "c14-price-slash-subscription-checker" {
+  name = "c14-priceslashers-subscription-checker-repo"
+  force_delete = true
 }

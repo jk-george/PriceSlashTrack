@@ -16,19 +16,6 @@ def test_insert_price_change_valid():
         22.49, 1, "2024-12-04 16:31:40")
 
 
-# def test_load_price_changes_valid():
-#     """Loading valid data into the price_changes table successfully."""
-#     mock_conn = Mock()
-#     test_data = [
-#         {'price': 22.49, 'product_id': 8, 'timestamp': '2024-12-04 16:31:40'},
-#         {'price': 7.69, 'product_id': 9, 'timestamp': '2024-12-04 16:31:40'}
-#     ]
-
-#     load_price_changes(test_data, mock_conn)
-
-#     assert mock_conn.commit.called
-#     assert not mock_conn.rollback.called
-
 def test_load_price_changes_valid():
     """Loading valid data into the price_changes table successfully."""
     mock_conn = MagicMock()

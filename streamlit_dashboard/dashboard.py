@@ -329,7 +329,6 @@ def display_charts(product_id) -> alt.Chart:
         filtered_df = df[df['Date'] >= (
             most_recent_timestamp - time_ranges[time_range])].copy()
 
-        # Use hour and minute for these time ranges
         filtered_df.loc[:, 'FormattedDate'] = filtered_df['Date'].dt.strftime(
             '%H:%M')
     else:  # "Last 3 Days"

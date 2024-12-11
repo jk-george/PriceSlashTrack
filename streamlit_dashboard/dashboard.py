@@ -310,7 +310,6 @@ def display_charts(product_id) -> alt.Chart:
 
     df = pd.DataFrame(result, columns=['Price', 'Date'])
 
-    # Ensure timestamps are parsed correctly and in UTC
     df['Date'] = pd.to_datetime(df['Date'], utc=True)
 
     current_time = pd.Timestamp.now(tz='UTC')

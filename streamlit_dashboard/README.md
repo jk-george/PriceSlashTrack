@@ -4,6 +4,12 @@
 
 This module hosts the Price Slashers dashboard. This dashboard showcases trends on product prices over time, along with their original and discounted prices. 
 
+## Initial Dashboard Wireframe
+
+![wireframe](../diagrams/wireframe.png)
+
+The wireframe outlines the initial design of the dashboard. It includes a login page for user authentication and account creation, and a main page where users can view product price trends, track new products, unsubscribe from tracking, and filter data by time ranges. This layout provides an intuitive and functional interface for managing and visualizing product price tracking.
+
 ## 🛠️ Prerequisites
 
 - **ECS Service** deployed from running [Terraform](../terraform/terraform-dashboard-ecs/README.md)

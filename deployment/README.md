@@ -10,3 +10,5 @@ Run the following commands from the **main** directory whilst also completing th
 4.  Find the `Image URI` of the `Image` (**not Image Index**) within the ECR: `c14-priceslashers-subscription-checker-repo` and add this to the terraform.tfvars file within the `terraform/terraform-subscriber-lambda` directory. 
 5. Run `bash deployment/final_terraforming.sh`
 
+
+

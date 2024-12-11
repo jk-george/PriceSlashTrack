@@ -164,7 +164,7 @@ def scrape_from_debenhams_html(html_content: bytes, url: str, product_id: int) -
 #     """Scrapes product, price and website information from John Lewis."""
 #     s = BeautifulSoup(html_content, 'html.parser')
 
-#     product_title_element = s.find("h1", {"data-testid" = "product:title"})
+#     product_title_element = s.find("h1", {"data-testid":"product:title"})
 #     print(product_title_element)
 #     if not product_title_element:
 #         logging.error("Cannot find product title on the page for URL: %s", url)

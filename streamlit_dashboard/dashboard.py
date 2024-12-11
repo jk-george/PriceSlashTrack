@@ -474,6 +474,8 @@ def show_main_page():
         with st.sidebar:
             page = option_menu(
                 menu_title="Menu", options=["About", "Current products", "Track new products", "Unsubscribe from product tracking"])
+            st.button("Log Out", key="logout", on_click=logged_out_clicked)
+
         user_id = st.session_state.get('user_id')
         if page == "About":
             show_about_page()
@@ -637,7 +639,6 @@ if __name__ == "__main__":
             show_login_page()
         else:
             if st.session_state['logged_in']:
-                show_logout_page()
                 show_main_page()
             else:
                 show_login_page()

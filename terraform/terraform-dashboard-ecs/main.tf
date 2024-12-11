@@ -67,6 +67,10 @@ resource "aws_ecs_task_definition" "c14-price-slash-dashboard-task-def" {
                     "value": var.AWS_SECRET_KEY
                 },
                 {
+                    "name": "FROM_EMAIL",
+                    "value": var.FROM_EMAIL
+                },
+                {
                     "name": "DB_NAME",
                     "value": var.DB_NAME
                 },

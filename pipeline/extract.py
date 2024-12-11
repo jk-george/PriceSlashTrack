@@ -160,15 +160,15 @@ def scrape_from_debenhams_html(html_content: bytes, url: str, product_id: int) -
     return product_information
 
 
-def scrape_from_john_lewis_html(html_content: bytes, url: str, product_id: int) -> dict:
-    """Scrapes product, price and website information from John Lewis."""
-    s = BeautifulSoup(html_content, 'html.parser')
+# def scrape_from_john_lewis_html(html_content: bytes, url: str, product_id: int) -> dict:
+#     """Scrapes product, price and website information from John Lewis."""
+#     s = BeautifulSoup(html_content, 'html.parser')
 
-    product_title_element = s.find("h1", {"data-testid" = "product:title"})
-    print(product_title_element)
-    if not product_title_element:
-        logging.error("Cannot find product title on the page for URL: %s", url)
-        return None
+#     product_title_element = s.find("h1", {"data-testid" = "product:title"})
+#     print(product_title_element)
+#     if not product_title_element:
+#         logging.error("Cannot find product title on the page for URL: %s", url)
+#         return None
 
 
 def scrape_from_steam_html(html_content: bytes, url: str, product_id: int) -> dict:

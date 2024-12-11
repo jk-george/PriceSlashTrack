@@ -1,7 +1,0 @@
-python-dotenv
-pandas
-altair
-streamlit
-psycopg2
-requests
-bs4

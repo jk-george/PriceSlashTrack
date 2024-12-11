@@ -2,5 +2,7 @@ pandas
 altair
 streamlit
 streamlit_option_menu
-beautifulsoup4
+bs4
 psycopg2-binary
+python-dotenv
+requests

@@ -22,5 +22,13 @@ resource "aws_ecr_repository" "ecr_for_dashboard" {
 
 resource "aws_ecr_repository" "c14-price-slash-subscription-checker" {
   name = "c14-priceslashers-subscription-checker-repo"
+  image_tag_mutability = "MUTABLE"  
+  image_scanning_configuration {
+    scan_on_push = true
+  }
   force_delete = true
+
+  lifecycle {
+    prevent_destroy = false
+  }
 }

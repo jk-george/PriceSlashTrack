@@ -10,11 +10,19 @@ import psycopg2
 from bs4 import BeautifulSoup
 from database_connection import get_connection, get_cursor
 from streamlit_option_menu import option_menu
+import streamlit_shadcn_ui as ui
+from streamlit_card import card
+
+
+st.set_page_config(
+    layout="wide"
+)
 
 header_section = st.container()
 main_section = st.container()
 login_section = st.container()
 logout_section = st.container()
+product_section = st.container()
 
 
 def get_html_with_age_gate_bypass(url: str) -> bytes:
@@ -291,7 +299,7 @@ def display_charts(product_id) -> alt.Chart:
     result = cursor.fetchall()
     df = pd.DataFrame(result, columns=['Price', 'Date'])
     return alt.Chart(df).mark_line().encode(
-        x='Date:T', y='Price:Q')
+        x='Date:T', y='Price / £:Q')
 
 
 def login(email: str, password: str) -> bool:
@@ -468,74 +476,89 @@ def show_about_page():
     """)
 
 
+def view_product(product_id, user_id):
+    """Views product info"""
+    with product_section:
+        product_name, url, original_price, product_description, image_url = get_product_info(
+            product_id)
+        latest_price = get_latest_price(product_id)
+        st.header(f"{product_name}")
+        if image_url:
+            st.image(image_url)
+
+        if product_description:
+            st.markdown(f"**Description:** {product_description}")
+        st.markdown(f"""**Current price:** £{latest_price}""")
+        st.markdown(f"""**Original price:** £{original_price}""")
+        st.markdown(f"""[**Link to product**]({url})""")
+        st.altair_chart(display_charts(product_id))
+        if st.button("Return"):
+            del st.session_state["current_product"]
+            st.rerun()
+        if st.button("Unsubscribe"):
+            stop_tracking_product(user_id, product_id)
+            st.toast(f"""You unsubscribed from tracking {product_name}""")
+
+
 def show_main_page():
     """Displays the main page on the dashboard"""
     with main_section:
         with st.sidebar:
             page = option_menu(
-                menu_title="Menu", options=["About", "Current products", "Track new products", "Unsubscribe from product tracking"])
+                menu_title="Menu", options=["About", "Current products", "Track new products"])
         user_id = st.session_state.get('user_id')
+        if "current_product" in st.session_state:
+            view_product(st.session_state.current_product, user_id)
+            return
         if page == "About":
+            st.session_state["About"] = True
             show_about_page()
-        elif page == "Current products":
-            st.header("Current products")
-            product_subscriptions = get_product_subscription(user_id)
-            if not product_subscriptions:
-                st.markdown("You are not currently tracking anything!")
-            else:
-                product_options = {
-                    get_product_info(product_id)[0]: product_id for product_id in product_subscriptions
-                }
-
-                selected_product_name = st.selectbox(
-                    "Select a product to view details:",
-                    options=list(product_options.keys()),
-                    help="Choose a product to see its details")
-                if selected_product_name:
-                    selected_product_id = product_options[selected_product_name]
-                    product_name, url, original_price, product_description, image_url = get_product_info(
-                        selected_product_id)
-                    latest_price = get_latest_price(selected_product_id)
-                    if image_url:
-                        st.image(image_url)
-                    st.subheader(f"{product_name}")
-                    if product_description:
-                        st.markdown(f"**Description:** {product_description}")
-                    st.markdown(f"""**Current price:** £{latest_price}""")
-                    st.markdown(f"""**Original price:** £{original_price}""")
-                    st.markdown(f"""[**Link to product**]({url})""")
-                    st.altair_chart(display_charts(selected_product_id))
         elif page == "Track new products":
+            st.session_state["Track new products"] = True
             st.header("Track a new product")
             url = st.text_input("Enter a new product URL: ")
             notification_price = st.text_input(
                 label="Enter the price threshold to receive email notifications about price drops: ")
             st.button("Track", on_click=track_clicked,
                       args=(user_id, url, notification_price))
-        elif page == "Unsubscribe from product tracking":
-            st.header("Unsubscribe from product tracking")
-            products_tracked = {}
-            if not get_product_subscription(user_id):
+        elif page == "Current products":
+            st.session_state["Current products"] = True
+            user_id = st.session_state.get('user_id')
+            product_subscriptions = get_product_subscription(user_id)
+
+            if not product_subscriptions:
                 st.markdown("You are not currently tracking anything!")
             else:
-                for product_id in get_product_subscription(user_id):
-                    product_name, url, original_price = get_product_info(
-                        product_id)
-                    products_tracked[product_name] = product_id
+                cols = st.columns(3, gap="small")
+                product_options = [
+                    [get_product_info(product_id), product_id] for product_id in product_subscriptions
+                ]
+                for i, product in enumerate(product_options):
+                    product_name = product[0][0]
+                    original_price = product[0][2]
+                    latest_price = get_latest_price(product[1])
+                    image = product[0][4]
 
-                selected_products = st.multiselect(
-                    "Select products you wish to untrack:",
-                    options=list(products_tracked.keys()))
-                if st.button("Unsubscribe from selected products"):
-                    if not selected_products:
-                        st.warning(
-                            "Please select at least one product to unsubscribe.")
-                    else:
-                        for product_name in selected_products:
-                            stop_tracking_product(
-                                user_id, products_tracked[product_name])
-                        st.toast(f"""You unsubscribed from tracking: {
-                            ', '.join(selected_products)}""")
+                    with cols[i % 3]:
+                        card(
+
+                            title=f"{product_name}",
+                            text=f"""£{latest_price}""",
+                            image=image,
+                            styles={"card": {
+                                "margin": "0px",
+                                "padding": "0px",
+                                "box-shadow": "0 0"
+                            }, "div": {
+                                "background": "#0000000"
+                            }},
+                            on_click=lambda: set_product(product[1])
+                        )
+
+
+def set_product(product_id):
+    st.session_state["current_product"] = product_id
+    st.rerun()
 
 
 def logged_out_clicked() -> None:
@@ -629,6 +652,7 @@ def show_login_page() -> None:
 
 
 if __name__ == "__main__":
+
     with header_section:
         st.title("Sales Tracker")
 

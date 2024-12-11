@@ -308,8 +308,10 @@ def display_charts(product_id) -> alt.Chart:
         st.warning(f"No price data available for Product ID {product_id}.")
         return None
 
-    df = pd.DataFrame(result, columns=['Price', 'date'])
-    df['date'] = pd.to_datetime(df['date'], utc=True)
+    df = pd.DataFrame(result, columns=['Price', 'Date'])
+
+    # Ensure timestamps are parsed correctly and in UTC
+    df['Date'] = pd.to_datetime(df['Date'], utc=True)
 
     current_time = pd.Timestamp.now(tz='UTC')
     time_ranges = {
@@ -321,33 +323,38 @@ def display_charts(product_id) -> alt.Chart:
     time_range = st.selectbox(
         "Select Time Range", list(time_ranges.keys()))
 
-    most_recent_timestamp = df['date'].max()
+    most_recent_timestamp = df['Date'].max()
 
+    # Filter data based on the selected time range
     if time_range == "Last 30 Minutes" or time_range == "Last 24 Hours":
-        filtered_df = df[df['date'] >= (
-            most_recent_timestamp - time_ranges[time_range])]
+        filtered_df = df[df['Date'] >= (
+            most_recent_timestamp - time_ranges[time_range])].copy()
 
-        filtered_df['formatted_date'] = filtered_df['date'].dt.strftime(
+        # Use hour and minute for these time ranges
+        filtered_df.loc[:, 'FormattedDate'] = filtered_df['Date'].dt.strftime(
             '%H:%M')
-    else:
-        filtered_df = df[df["date"] >= (
-            current_time - time_ranges[time_range])]
-        filtered_df['formatted_date'] = filtered_df['date'].dt.strftime(
+    else:  # "Last 3 Days"
+        filtered_df = df[df["Date"] >= (
+            current_time - time_ranges[time_range])].copy()
+
+        # Include day, hour, and minute for this time range
+        filtered_df.loc[:, 'FormattedDate'] = filtered_df['Date'].dt.strftime(
             '%Y-%m-%d %H:%M:%S')
 
     if filtered_df.empty:
         st.warning("No price data available for the selected time range.")
         return None
 
+    # Create the Altair chart
     chart = alt.Chart(filtered_df).mark_line().encode(
-        x=alt.X('formatted_date:N',
+        x=alt.X('FormattedDate:N',
                 title='Timestamp',
                 axis=alt.Axis(
                     labelAngle=-45,
                     tickCount=10
                 )),
         y=alt.Y('Price:Q', title='Price'),
-        tooltip=['date:T', 'Price:Q']
+        tooltip=['Date:T', 'Price:Q']
     ).properties(
         width=700,
         height=400,

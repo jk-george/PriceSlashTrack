@@ -330,7 +330,7 @@ def display_charts(product_id) -> alt.Chart:
 
         filtered_df.loc[:, 'FormattedDate'] = filtered_df['Date'].dt.strftime(
             '%H:%M')
-    else:  # "Last 3 Days"
+    else:
         filtered_df = df[df["Date"] >= (
             current_time - time_ranges[time_range])].copy()
 

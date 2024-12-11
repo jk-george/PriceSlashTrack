@@ -1,7 +1,6 @@
+"""Unit Tests for the loading process of the pipeline."""
 # pylint: skip-file
-import unittest
 from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
 from load import insert_price_change, load_price_changes
 
 
@@ -20,10 +19,9 @@ def test_insert_price_change_valid():
 @patch("load.product_id_exists")
 def test_load_price_changes_valid(mock_product_id_exists):
     """Loading valid data into the price_changes table successfully."""
-
-    mock_product_id_exists.return_value = True
-
-    mock_conn = Mock()
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
     test_data = [
         {'price': 22.49, 'product_id': 8, 'timestamp': '2024-12-04 16:31:40'},
         {'price': 7.69, 'product_id': 9, 'timestamp': '2024-12-04 16:31:40'}
@@ -31,6 +29,25 @@ def test_load_price_changes_valid(mock_product_id_exists):
 
     load_price_changes(test_data, mock_conn)
 
+    assert mock_cursor.execute.call_count == len(test_data)
+    assert mock_conn.commit.called
+    assert not mock_conn.rollback.called
+
+
+def test_load_price_changes_one_valid_one_invalid():
+    """Loading valid data into the price_changes table successfully even if there is one invalid data."""
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+
+    test_data = [
+        {'product_id': 8, 'timestamp': '2024-12-04 16:31:40'},
+        {'price': 7.69, 'product_id': 9, 'timestamp': '2024-12-04 16:31:40'}
+    ]
+
+    load_price_changes(test_data, mock_conn)
+
+    assert mock_cursor.execute.call_count == 1
     assert mock_conn.commit.called
     assert not mock_conn.rollback.called
 
@@ -43,7 +60,7 @@ def test_load_price_changes_invalid(mock_insert_price_change, mock_product_id_ex
     mock_product_id_exists.return_value = False
     mock_insert_price_change.return_value = Exception("Database error")
 
-    test_data = [{'price': 22.49, 'product_id': -18,
+    test_data = [{'product_id': 8,
                   'timestamp': '2024-12-04 16:31:40'}]
 
     load_price_changes(test_data, mock_conn)
@@ -80,13 +97,10 @@ def test_load_price_changes_partial_failure(mock_insert_price_change, mock_produ
     mock_product_id_exists.return_value = True
 
     test_data = [
-        {'price': 22.49, 'product_id': 8, 'timestamp': '2024-12-04 16:31:40'},
+        {'product_id': 8, 'timestamp': '2024-12-04 16:31:40'},
         {'price': 7.69, 'product_id': 9, 'timestamp': '2024-12-04 16:31:40'}
     ]
 
-    try:
-        load_price_changes(test_data, mock_conn)
-    except Exception:
-        pass
+    load_price_changes(test_data, mock_conn)
     mock_conn.rollback.assert_not_called()
     mock_conn.commit.assert_called_once()

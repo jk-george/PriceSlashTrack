@@ -1,11 +1,8 @@
+"""Useful functions for connecting to the database."""
+
 import os
 from dotenv import load_dotenv
-import pandas as pd
-import altair as alt
-import streamlit as st
 import psycopg2
-
-load_dotenv()
 
 
 def get_connection():
@@ -36,4 +33,5 @@ def get_cursor(conn):
 
 
 if __name__ == "__main__":
+    load_dotenv()
     print(get_connection())

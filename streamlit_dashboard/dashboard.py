@@ -134,10 +134,23 @@ def scrape_from_steam_html(html_content: bytes, url: str) -> dict:
     regular_price_element = s.find("div", class_="game_purchase_price price", attrs={
         "data-price-final": True})
 
+    image_element = s.find("img", class_="game_header_image_full")
+    description_element = s.find("div", class_="game_description_snippet")
+
     if not game_title_element:
         logging.error("Cannot find product title on the page for URL: %s", url)
         return None
     game_title = game_title_element.text.strip()
+
+    if image_element:
+        image_url = image_element['src']
+    else:
+        image_url = None
+
+    if description_element:
+        product_description = description_element.text.strip()
+    else:
+        product_description = "No description found."
 
     if original_price_element and discount_price_element:
         original_price = original_price_element.text.strip(
@@ -155,6 +168,8 @@ def scrape_from_steam_html(html_content: bytes, url: str) -> dict:
         "original_price": original_price,
         "discount_price": discount_price,
         "game_title": game_title,
+        "image_url": image_url,
+        "product_description": product_description,
         "website": get_website_from_url(url)}
 
     return product_information
@@ -245,7 +260,7 @@ def get_product_info(product_id) -> tuple:
     conn = get_connection()
     cursor = get_cursor(conn)
     try:
-        query = """SELECT product_name, url, original_price FROM product WHERE product_id = %s"""
+        query = """SELECT product_name, url, original_price, product_description, image_url FROM product WHERE product_id = %s"""
         cursor.execute(query, (product_id,))
         return cursor.fetchone()
     except Exception as e:
@@ -350,9 +365,9 @@ def insert_into_product(website_id: int, url: str) -> int:
             return get_product_id(url)
         else:
             cursor.execute(
-                """INSERT INTO product (product_name, url, website_id, original_price) VALUES (%s, %s, %s, %s);""",
+                """INSERT INTO product (product_name, url, website_id, original_price, image_url, product_description) VALUES (%s, %s, %s, %s, %s, %s);""",
                 (product_info.get("game_title"), url, website_id,
-                 clean_price(product_info.get("original_price")),))
+                 clean_price(product_info.get("original_price")), product_info.get("image_url"), product_info.get("product_description"),))
             cursor.close()
             conn.commit()
             conn.close()
@@ -478,11 +493,14 @@ def show_main_page():
                     help="Choose a product to see its details")
                 if selected_product_name:
                     selected_product_id = product_options[selected_product_name]
-                    product_name, url, original_price = get_product_info(
+                    product_name, url, original_price, product_description, image_url = get_product_info(
                         selected_product_id)
                     latest_price = get_latest_price(selected_product_id)
-
+                    if image_url:
+                        st.image(image_url)
                     st.subheader(f"{product_name}")
+                    if product_description:
+                        st.markdown(f"**Description:** {product_description}")
                     st.markdown(f"""**Current price:** £{latest_price}""")
                     st.markdown(f"""**Original price:** £{original_price}""")
                     st.markdown(f"""[**Link to product**]({url})""")

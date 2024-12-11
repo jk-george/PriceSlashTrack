@@ -38,7 +38,6 @@ VALUES
     ('Kids Step Stool', 'https://www.debenhams.com/product/homcom-kids-step-stool-adjustable-standing-platform-toddler-kitchen-stool_p-6b2dd00a-6eaa-45ae-9c9c-570ecd746453?colour=Grey', 7, 97.99),
     ('Christmas Tree Shopping Bag', 'https://www.debenhams.com/product/christmas-village-9ft-christmas-tree-storage-bag---green_p-b72e2ccf-20e4-4497-820f-f2dca34442df?colour=Green', 7, 12.99);
 
-
 INSERT INTO price_changes (price, product_id, timestamp)
 VALUES 
     (949.99, 1, '2024-12-01 10:00:00'),

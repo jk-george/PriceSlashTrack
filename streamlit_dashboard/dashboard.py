@@ -341,7 +341,6 @@ def display_charts(product_id) -> alt.Chart:
         st.warning("No price data available for the selected time range.")
         return None
 
-    # Create the Altair chart
     chart = alt.Chart(filtered_df).mark_line().encode(
         x=alt.X('FormattedDate:N',
                 title='Timestamp',

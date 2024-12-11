@@ -1,6 +1,5 @@
 # pylint: skip-file
 import pytest
-from time import sleep
 from extract import scrape_from_steam_html, get_html_from_url, get_website_from_url, scrape_pricing_process
 
 

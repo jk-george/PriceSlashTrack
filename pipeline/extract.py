@@ -1,14 +1,4 @@
-"""
-Extraction script to find all sales tracking data we need from subscribed URL pages.
-
-1. Connect to RDS
-2. Query all URLs from the RDS
-3. Scrape the URL for: product_name,original_price,discount_price
-
-psql -h $DB_HOST -U $DB_USER -d $DB_NAME -p $DB_PORT -> to connect to db for testing
-
-
-"""
+"""Extraction script that retrieves information from products with active subscriptions."""
 import logging
 
 from dotenv import load_dotenv
@@ -18,7 +8,7 @@ from bs4 import BeautifulSoup
 from connect_to_database import get_connection, get_cursor
 
 QUERY_TO_FIND_URLS = """
-SELECT product_id,url FROM product WHERE product_id = 20;
+SELECT product_id,url FROM product;
 """
 
 
@@ -95,8 +85,11 @@ def scrape_pricing_process(html_content: bytes, url: str, product_id: int) -> di
     if "https://store.steampowered.com" in website_url:
         return scrape_from_steam_html(html_content, url, product_id)
 
+    if "https://www.debenhams.com" in website_url:
+        return scrape_from_debenhams_html(html_content, url, product_id)
+
     logging.error(
-        "Cannot scrape that URL, since it's not a Debenhams/Steam/John Lewis webpage.")
+        "Cannot scrape that URL, since it's not a Debenhams or Steam webpage.")
     return
 
 
@@ -126,29 +119,12 @@ def scrape_from_debenhams_html(html_content: bytes, url: str, product_id: int) -
     original_price = original_price_element.text.strip(
     ) if original_price_element else current_price
 
-# product description and images
-    product_description_element = s.find(
-        "div", class_="prose")
-    if not product_description_element:
-        logging.error(
-            "Cannot find product_description element for URL: %s", url)
-        return None
-    product_description = product_description_element.text.strip()
-
-    image_url_element = s.find(
-        'img', attrs={'class': 'h-auto w-auto object-cover undefined undefined'})
-    if not image_url_element:
-        logging.error("Cannot find image element for URL: %s", url)
-        image_url_element = None
-    image_url = image_url_element['src']
-
     product_information = {
         "product_id": product_id,
         "original_price": original_price,
         "discount_price": current_price,
         "product_title": product_title,
-        "website": get_website_from_url(url)
-    }
+        "website": get_website_from_url(url)}
 
     print(product_information)
     return product_information
@@ -223,5 +199,3 @@ def main_extraction_process() -> list[dict]:
 if __name__ == "__main__":
     load_dotenv()
     main_extraction_process()
-
-    url = "https://www.johnlewis.com/astro-bot-ps5/p112198928"

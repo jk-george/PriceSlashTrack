@@ -30,21 +30,27 @@ def test_url_is_not_valid_returns_error_message():
         "https://amazon.co.uk/something-random") == "Error: Something went wrong when trying to reach your webpage."
 
 
-@pytest.fixture
-def html_object():
-    """Fixture that creates a test html string of a game called The Planet Crafter"""
-    file_path = f"pipeline/test_extract_html.txt"
-    with open(file_path, "r", encoding="UTF-8") as test_file:
-        html_string = test_file.read()
-    return html_string
-
-
-def test_scraper_gets_correct_steam_original_and_discount_price(html_object):
-    """Tests to see that the scraper can get a steam original and discount price."""
-    url = "https://store.steampowered.com/app/1284190/The_Planet_Crafter/"
-    test_product_info = scrape_from_steam_html(html_object, url, 1)
-    assert test_product_info.get("original_price") == "£19.99"
-    assert test_product_info.get("discount_price") == "£11.99"
-    assert test_product_info.get("game_title") == "The Planet Crafter"
-    assert test_product_info.get(
-        "website") == "https://store.steampowered.com"
+def test_scrape_from_steam_html_valid():
+    """Test scraping product info from Steam sample HTML."""
+    steam_html = """
+    <html>
+      <div id="game_area_purchase">
+        <div class="discount_original_price">£19.99</div>
+        <div class="discount_final_price">£9.99</div>
+        <div class="game_header_image_full">https://testing.com/storage/image/test.jpg</div>
+        <div class="game_description_snippet">Testing Description</div>
+      </div>
+      <div id="appHubAppName" class="apphub_AppName">Test Game</div>
+    </html>
+    """
+    html_content = steam_html.encode()
+    url = "https://store.steampowered.com/app/12345/"
+    product_id = 1
+    result = scrape_from_steam_html(html_content, url, product_id=1)
+    assert result == {
+        "product_id": 1,
+        "original_price": "£19.99",
+        "discount_price": "£9.99",
+        "game_title": "Test Game",
+        "website": "https://store.steampowered.com"
+    }

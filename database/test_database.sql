@@ -21,7 +21,7 @@ VALUES
     ('BestBuy'),
     ('Walmart'),
     ('Target'),
-    ('Steam')
+    ('Steam'),
     ('Debenhams');
 
 INSERT INTO product (product_name, url, website_id, original_price)

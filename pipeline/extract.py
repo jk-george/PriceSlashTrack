@@ -18,7 +18,7 @@ from bs4 import BeautifulSoup
 from connect_to_database import get_connection, get_cursor
 
 QUERY_TO_FIND_URLS = """
-SELECT product_id,url FROM product WHERE product_id = 15;
+SELECT product_id,url FROM product WHERE product_id = 20;
 """
 
 
@@ -98,8 +98,11 @@ def scrape_pricing_process(html_content: bytes, url: str, product_id: int) -> di
     if "https://www.debenhams.com" in website_url:
         return scrape_from_debenhams_html(html_content, url, product_id)
 
+    if "https://www.johnlewis.com" in website_url:
+        return scrape_from_john_lewis_html(html_content, url, product_id)
+
     logging.error(
-        "Cannot scrape that URL, since it's not a Debenhams/Steam webpage.")
+        "Cannot scrape that URL, since it's not a Debenhams/Steam/John Lewis webpage.")
     return
 
 
@@ -155,6 +158,17 @@ def scrape_from_debenhams_html(html_content: bytes, url: str, product_id: int) -
 
     print(product_information)
     return product_information
+
+
+def scrape_from_john_lewis_html(html_content: bytes, url: str, product_id: int) -> dict:
+    """Scrapes product, price and website information from John Lewis."""
+    s = BeautifulSoup(html_content, 'html.parser')
+
+    product_title_element = s.find("h1", {"data-testid" = "product:title"})
+    print(product_title_element)
+    if not product_title_element:
+        logging.error("Cannot find product title on the page for URL: %s", url)
+        return None
 
 
 def scrape_from_steam_html(html_content: bytes, url: str, product_id: int) -> dict:
@@ -226,3 +240,5 @@ def main_extraction_process() -> list[dict]:
 if __name__ == "__main__":
     load_dotenv()
     main_extraction_process()
+
+    url = "https://www.johnlewis.com/astro-bot-ps5/p112198928"

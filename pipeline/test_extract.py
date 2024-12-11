@@ -1,5 +1,6 @@
 # pylint: skip-file
 import pytest
+from time import sleep
 from extract import scrape_from_steam_html, get_html_from_url, get_website_from_url, scrape_pricing_process
 
 
@@ -43,6 +44,7 @@ def test_scraper_gets_correct_steam_original_and_discount_price(html_object):
     """Tests to see that the scraper can get a steam original and discount price."""
     url = "https://store.steampowered.com/app/1284190/The_Planet_Crafter/"
     test_product_info = scrape_from_steam_html(html_object, url, 1)
+    sleep(0.1)
     assert test_product_info.get("original_price") == "£19.99"
     assert test_product_info.get("discount_price") == "£11.99"
     assert test_product_info.get("game_title") == "The Planet Crafter"

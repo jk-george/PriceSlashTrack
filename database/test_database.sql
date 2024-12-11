@@ -21,7 +21,8 @@ VALUES
     ('BestBuy'),
     ('Walmart'),
     ('Target'),
-    ('Steam');
+    ('Steam')
+    ('Debenhams');
 
 INSERT INTO product (product_name, url, website_id, original_price)
 VALUES 
@@ -32,10 +33,10 @@ VALUES
     ('Smartwatch', 'https://www.target.com/smartwatch', 5, 149.99),
     ('Slay the Spire', 'https://store.steampowered.com/app/646570/Slay_the_Spire/', 6, 19.99),
     ('Cyberpunk 2077','https://store.steampowered.com/app/1091500/Cyberpunk_2077/',6,49.99),
-    ('Stardew Valley','https://store.steampowered.com/app/413150/Stardew_Valley/',6,10.99),
-    ('Amazon Basics 3-Button USB Wired Quiet Mouse – Standard, Black','https://www.amazon.co.uk/Amazon-Basics-3-Button-Wired-Quiet/dp/B08P6FXKP9/ref=sr_1_1_ffob_sspa?dib=eyJ2IjoiMSJ9.g3__HWg7j0aKkKDxSF-bzRPowngP20NVGO9Qu_tFElQOss-j4y20Zsap8Hmjp8txZBteeMiJZwTjdUKUi5qmLNcIf6CzaKEGVtjw99C1Z6TA_pVy-IFgYyd7ilktGnUuGfGEYhyip4LF4aiCwDqkQZcHPl7UJOz33jY0F73lAWqhAsC2DTZK2nCpWfuU4f6Bhb6qK--Q9Esz6xgQ6DUaIYHHp5LJDcUlhlecP1gCDSU.ZfZC0Snr23MWdCJfl7Y2IXcUHMblQiow8boVuUdIs7g&dib_tag=se&keywords=mouse&qid=1733492153&sr=8-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&psc=1',1,8.99),
-    ('Razer Viper V3 Pro','https://www.amazon.co.uk/Razer-Viper-Pro-Ultra-lightweight-HyperPolling/dp/B0CSPN2G5Z/',1,159.99);
-    
+    ('Stardew Valley','https://store.steampowered.com/app/413150/Stardew_Valley/',6,10.99),('Amazon Basics 3-Button USB Wired Quiet Mouse – Standard, Black','https://www.amazon.co.uk/Amazon-Basics-3-Button-Wired-Quiet/dp/B08P6FXKP9/ref=sr_1_1_ffob_sspa?dib=eyJ2IjoiMSJ9.g3__HWg7j0aKkKDxSF-bzRPowngP20NVGO9Qu_tFElQOss-j4y20Zsap8Hmjp8txZBteeMiJZwTjdUKUi5qmLNcIf6CzaKEGVtjw99C1Z6TA_pVy-IFgYyd7ilktGnUuGfGEYhyip4LF4aiCwDqkQZcHPl7UJOz33jY0F73lAWqhAsC2DTZK2nCpWfuU4f6Bhb6qK--Q9Esz6xgQ6DUaIYHHp5LJDcUlhlecP1gCDSU.ZfZC0Snr23MWdCJfl7Y2IXcUHMblQiow8boVuUdIs7g&dib_tag=se&keywords=mouse&qid=1733492153&sr=8-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&psc=1',1,8.99)
+    ('Razer Viper V3 Pro','https://www.amazon.co.uk/Razer-Viper-Pro-Ultra-lightweight-HyperPolling/dp/B0CSPN2G5Z/',1,159.99),
+    ('Kids Step Stool', 'https://www.debenhams.com/product/homcom-kids-step-stool-adjustable-standing-platform-toddler-kitchen-stool_p-6b2dd00a-6eaa-45ae-9c9c-570ecd746453?colour=Grey', 7, 97.99),
+    ('Christmas Tree Shopping Bag', 'https://www.debenhams.com/product/christmas-village-9ft-christmas-tree-storage-bag---green_p-b72e2ccf-20e4-4497-820f-f2dca34442df?colour=Green', 7, 12.99);
 
 INSERT INTO price_changes (price, product_id, timestamp)
 VALUES 

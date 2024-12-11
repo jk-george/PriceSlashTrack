@@ -95,12 +95,53 @@ def scrape_pricing_process(html_content: bytes, url: str, product_id: int) -> di
     if "https://store.steampowered.com" in website_url:
         return scrape_from_steam_html(html_content, url, product_id)
 
-    if "https://www.amazon.com" in url or "https://www.amazon.co." in website_url:
-        return scrape_from_amazon_html(html_content, url, product_id)
+    # if "https://www.amazon.com" in url or "https://www.amazon.co." in website_url:
+    #     return scrape_from_amazon_html(html_content, url, product_id)
+
+    if "https://www.debenhams.com" in website_url:
+        return scrape_from_debenhams_html(html_content, url, product_id)
 
     logging.error(
         "Cannot scrape that URL, since it's not an Amazon/Steam webpage.")
     return
+
+
+def scrape_from_debenhams_html(html_content: bytes, url: str, product_id: int) -> dict:
+    """Scrapes product, price and website information from Debenhams."""
+    s = BeautifulSoup(html_content, 'html.parser')
+
+    product_title_element = s.find("h1", class_="text-xl")
+    if not product_title_element:
+        logging.error("Cannot find product title on the page for URL: %s", url)
+        return None
+
+    current_price_element = s.find(
+        "span", {"data-test-id": "product-price-current"})
+    if not current_price_element:
+        logging.error("Cannot find current price element for URL: %s", url)
+        return None
+
+    original_price_element = s.find(
+        "span", {"data-test-id": "product-price-was"})
+    if not original_price_element:
+        logging.error("Cannot find original price element for URL: %s", url)
+        original_price_element = current_price_element
+
+    product_title = product_title_element.text.strip()
+    current_price = current_price_element.text.strip()
+    original_price = original_price_element.text.strip(
+    ) if original_price_element else current_price
+
+    product_information = {
+        "product_id": product_id,
+        "original_price": original_price,
+        "discount_price": current_price,
+        "product_title": product_title,
+        "website": get_website_from_url(url)
+    }
+
+    print(product_information)
+    return product_information
 
 
 def scrape_from_amazon_html(html_content: bytes, url: str, product_id: int) -> dict:
@@ -182,7 +223,7 @@ def scrape_from_steam_html(html_content: bytes, url: str, product_id: int) -> di
 
 def main_extraction_process() -> list[dict]:
     """ Carries out the whole extraction process into a list of dictionaries,
-    ready to be transformed/inserted into a Database. 
+    ready to be transformed/inserted into a Database.
     Reminder: extract_urls_from_db() -> list of [id,url]"""
     list_of_urls = extract_urls_from_db()
     print(list_of_urls)

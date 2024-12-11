@@ -19,6 +19,16 @@ def insert_price_change(conn: connection, product_id: int, price: float, timesta
     logging.info("Inserted price for product_id %s", product_id)
 
 
+def product_id_exists(conn: connection, product_id: int) -> bool:
+    """Checks products table to see if product_id exists."""
+    with conn.cursor() as db_cursor:
+        db_cursor.execute(
+            "SELECT * FROM product WHERE product_id = %s", (product_id,))
+        if db_cursor.fetchone():
+            return True
+        return False
+
+
 def load_price_changes(products_data: list[dict], conn: connection) -> None:
     """Loads cleaned price data into database."""
     successfully_inserted = 0

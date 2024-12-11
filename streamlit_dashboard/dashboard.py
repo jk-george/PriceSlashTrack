@@ -68,49 +68,109 @@ def get_website_from_url(url: str) -> str:
     return website_url
 
 
-def scrape_from_html(html_content: bytes, url: str) -> dict:
-    """ Scrapes from html to get a dictionary with the:
-    - product_name
-    - original_price
-    - discount_price
-    - website
-    """
+def scrape_pricing_process(html_content: bytes, url: str) -> dict:
+    """ Chooses which scraper to use based off of the URL """
+
+    website_url = get_website_from_url(url)
+
+    if "https://store.steampowered.com" in website_url:
+        return scrape_from_steam_html(html_content, url)
+
+    if "https://www.amazon.com" in url or "https://www.amazon.co." in website_url:
+        return scrape_from_amazon_html(html_content, url)
+
+    logging.error(
+        "Cannot scrape that URL, since it's not an Amazon/Steam webpage.")
+    return
+
+
+def scrape_from_amazon_html(html_content: bytes, url: str) -> dict:
+    """Scrapes product, price and website information from Amazon."""
+    s = BeautifulSoup(html_content, 'html.parser')
+
+    results = s.find("div", id="corePriceDisplay_desktop_feature_div")
+
+    if not results:
+        logging.error("Can't scrape from Amazon URL")
+        return None
+
+    product_title_element = s.find(id="productTitle")
+
+    if not product_title_element:
+        logging.error("Cannot find game title on the page for URL: %s", url)
+        return None
+
+    discount_price = results.find(
+        "div", class_="a-section a-spacing-none aok-align-center aok-relative").find("span", class_="aok-offscreen").text
+    original_price = results.find(
+        "div",
+        class_="a-section a-spacing-small aok-align-center").find("span", class_="a-offscreen").text
+    product_title = product_title_element.text.strip()
+
+    product_information = {
+        "original_price": original_price,
+        "discount_price": discount_price,
+        "game_title": product_title,
+        "website": get_website_from_url(url)}
+    return product_information
+
+
+def scrape_from_steam_html(html_content: bytes, url: str) -> dict:
+    """Scrapes product, price and website information from Steam."""
     s = BeautifulSoup(html_content, 'html.parser')
 
     results = s.find(id="game_area_purchase")
 
     if not results:
-        logging.error("Can't scrape that URL.")
+        logging.error("Can't scrape that Steam URL.")
         return None
 
-    original_price_elem = results.find(
+    original_price_element = results.find(
         "div", class_="discount_original_price")
-    discount_price_elem = results.find(
+    discount_price_element = results.find(
         "div", class_="discount_final_price")
-    game_title_elem = s.find(
+    game_title_element = s.find(
         id="appHubAppName", class_="apphub_AppName")
-    regular_price_elem = s.find("div", class_="game_purchase_price price", attrs={
-                                "data-price-final": True})
+    regular_price_element = s.find("div", class_="game_purchase_price price", attrs={
+        "data-price-final": True})
 
-    if not game_title_elem:
-        logging.error("Cannot find game title on the page for URL: %s", url)
+    image_element = s.find("img", class_="game_header_image_full")
+    description_element = s.find("div", class_="game_description_snippet")
+
+    if not game_title_element:
+        logging.error("Cannot find product title on the page for URL: %s", url)
         return None
-    game_title = game_title_elem.text.strip()
+    game_title = game_title_element.text.strip()
 
-    if original_price_elem and discount_price_elem:
-        original_price = original_price_elem.text.strip() if original_price_elem else "N/A"
-        discount_price = discount_price_elem.text.strip() if discount_price_elem else "N/A"
-    elif regular_price_elem:
-        original_price = regular_price_elem.text.strip()
+    if image_element:
+        image_url = image_element['src']
+    else:
+        image_url = None
+
+    if description_element:
+        product_description = description_element.text.strip()
+    else:
+        product_description = "No description found."
+
+    if original_price_element and discount_price_element:
+        original_price = original_price_element.text.strip(
+        ) if original_price_element else "N/A"
+        discount_price = discount_price_element.text.strip(
+        ) if discount_price_element else "N/A"
+    elif regular_price_element:
+        original_price = regular_price_element.text.strip()
         discount_price = original_price
     else:
         original_price = "N/A"
         discount_price = "N/A"
 
-    product_information = {"original_price": original_price,
-                           "discount_price": discount_price,
-                           "game_title": game_title,
-                           "website": get_website_from_url(url)}
+    product_information = {
+        "original_price": original_price,
+        "discount_price": discount_price,
+        "game_title": game_title,
+        "image_url": image_url,
+        "product_description": product_description,
+        "website": get_website_from_url(url)}
 
     return product_information
 
@@ -200,7 +260,7 @@ def get_product_info(product_id) -> tuple:
     conn = get_connection()
     cursor = get_cursor(conn)
     try:
-        query = """SELECT product_name, url, original_price FROM product WHERE product_id = %s"""
+        query = """SELECT product_name, url, original_price, product_description, image_url FROM product WHERE product_id = %s"""
         cursor.execute(query, (product_id,))
         return cursor.fetchone()
     except Exception as e:
@@ -297,7 +357,7 @@ def insert_into_website(website: str) -> int:
 
 def insert_into_product(website_id: int, url: str) -> int:
     """Inserts new products into the product table and returns the corresponding product id"""
-    product_info = scrape_from_html(get_html_from_url(url), url)
+    product_info = scrape_pricing_process(get_html_from_url(url), url)
     try:
         conn = get_connection()
         cursor = get_cursor(conn)
@@ -305,9 +365,9 @@ def insert_into_product(website_id: int, url: str) -> int:
             return get_product_id(url)
         else:
             cursor.execute(
-                """INSERT INTO product (product_name, url, website_id, original_price) VALUES (%s, %s, %s, %s);""",
+                """INSERT INTO product (product_name, url, website_id, original_price, image_url, product_description) VALUES (%s, %s, %s, %s, %s, %s);""",
                 (product_info.get("game_title"), url, website_id,
-                 clean_price(product_info.get("original_price")),))
+                 clean_price(product_info.get("original_price")), product_info.get("image_url"), product_info.get("product_description"),))
             cursor.close()
             conn.commit()
             conn.close()
@@ -358,7 +418,7 @@ def track_product(user_id, url, notification_price):
     website_id = insert_into_website(get_website_from_url(url))
     product_id = insert_into_product(website_id, url)
     insert_into_subscription(user_id, product_id, notification_price)
-    price = (scrape_from_html(get_html_from_url(url), url)).get(
+    price = (scrape_pricing_process(get_html_from_url(url), url)).get(
         "discount_price")
     insert_initial_price(clean_price(price), product_id)
     st.toast("New product successfully tracked!")
@@ -379,6 +439,35 @@ def stop_tracking_product(user_id, product_id):
         return None
 
 
+def show_about_page():
+    """Displays the About page with project overview and instructions."""
+    st.header("📖 About")
+    st.markdown("""
+    🛒 **Welcome to Price Tracker!**
+
+    Price Tracker is a tool designed to help you monitor the prices of your favorite products, track price changes over time, and get notified when prices drop below your desired threshold. 
+
+    ### 🎯 Dashboard Features:
+    - **Current Products**: View the products you are tracking, their current prices, and price trends over time.
+    - **Track New Products**: Add a new product URL and set a price threshold to receive notifications about price drops.
+    - **Unsubscribe From Product Tracking**: Manage your tracked products by unsubscribing from the ones you no longer wish to monitor.
+
+    ### 🤝 How to Use:
+    1. **Log In or Create an Account**:
+        - If you are a returning user, log in with your email and password.
+        - New users can create an account by providing their details.
+    2. **Track a Product**:
+        - Navigate to **Track New Products**.
+        - Enter the product URL and set a notification price.
+    3. **Monitor Your Products**:
+        - Check **Current Products** to view the latest prices and trends.
+    4. **Unsubscribe**:
+        - Use **Unsubscribe From Product Tracking** to stop tracking products.
+
+    We hope this tool makes it easier for you to save money and stay informed about the best deals!
+    """)
+
+
 def show_main_page():
     """Displays the main page on the dashboard"""
     with main_section:
@@ -387,19 +476,35 @@ def show_main_page():
                 menu_title="Menu", options=["About", "Current products", "Track new products", "Unsubscribe from product tracking"])
         user_id = st.session_state.get('user_id')
         if page == "About":
-            st.header("About")
-            st.markdown("Price Tracker")
+            show_about_page()
         elif page == "Current products":
             st.header("Current products")
-            for product_id in get_product_subscription(user_id):
-                product_name, url, original_price = get_product_info(
-                    product_id)
-                latest_price = get_latest_price(product_id)
-                st.subheader(f"{product_name}")
-                st.markdown(f"""Current price: £{latest_price}""")
-                st.markdown(f"""Original price: £{original_price}""")
-                st.markdown(f"""Link: {url}""")
-                st.altair_chart(display_charts(product_id))
+            product_subscriptions = get_product_subscription(user_id)
+            if not product_subscriptions:
+                st.markdown("You are not currently tracking anything!")
+            else:
+                product_options = {
+                    get_product_info(product_id)[0]: product_id for product_id in product_subscriptions
+                }
+
+                selected_product_name = st.selectbox(
+                    "Select a product to view details:",
+                    options=list(product_options.keys()),
+                    help="Choose a product to see its details")
+                if selected_product_name:
+                    selected_product_id = product_options[selected_product_name]
+                    product_name, url, original_price, product_description, image_url = get_product_info(
+                        selected_product_id)
+                    latest_price = get_latest_price(selected_product_id)
+                    if image_url:
+                        st.image(image_url)
+                    st.subheader(f"{product_name}")
+                    if product_description:
+                        st.markdown(f"**Description:** {product_description}")
+                    st.markdown(f"""**Current price:** £{latest_price}""")
+                    st.markdown(f"""**Original price:** £{original_price}""")
+                    st.markdown(f"""[**Link to product**]({url})""")
+                    st.altair_chart(display_charts(selected_product_id))
         elif page == "Track new products":
             st.header("Track a new product")
             url = st.text_input("Enter a new product URL: ")
@@ -408,10 +513,32 @@ def show_main_page():
             st.button("Track", on_click=track_clicked,
                       args=(user_id, url, notification_price))
         elif page == "Unsubscribe from product tracking":
-            ...
+            st.header("Unsubscribe from product tracking")
+            products_tracked = {}
+            if not get_product_subscription(user_id):
+                st.markdown("You are not currently tracking anything!")
+            else:
+                for product_id in get_product_subscription(user_id):
+                    product_name, url, original_price = get_product_info(
+                        product_id)
+                    products_tracked[product_name] = product_id
+
+                selected_products = st.multiselect(
+                    "Select products you wish to untrack:",
+                    options=list(products_tracked.keys()))
+                if st.button("Unsubscribe from selected products"):
+                    if not selected_products:
+                        st.warning(
+                            "Please select at least one product to unsubscribe.")
+                    else:
+                        for product_name in selected_products:
+                            stop_tracking_product(
+                                user_id, products_tracked[product_name])
+                        st.toast(f"""You unsubscribed from tracking: {
+                            ', '.join(selected_products)}""")
 
 
-def LoggedOut_Clicked() -> None:
+def logged_out_clicked() -> None:
     """Changes logged in state to false"""
     st.session_state['logged_in'] = False
 
@@ -420,7 +547,7 @@ def show_logout_page() -> None:
     """Displays logout page"""
     login_section.empty()
     with logout_section:
-        st.button("Log Out", key="logout", on_click=LoggedOut_Clicked)
+        st.button("Log Out", key="logout", on_click=logged_out_clicked)
 
 
 def login_clicked(email, password) -> None:
@@ -450,8 +577,23 @@ def create_account_clicked(first_name, last_name, new_email, new_password) -> No
 
 def track_clicked(user_id, url, notification_price) -> None:
     """Tracks product"""
+    error_present = False
     if not url or not notification_price:
         st.error("All fields are required to track a product.")
+        error_present = True
+    elif not scrape_pricing_process(get_html_from_url(url), url):
+        st.error("Cannot fetch data from that link.")
+        error_present = True
+    try:
+        notification_price = float(notification_price)
+        if notification_price <= 0:
+            st.error("Notification price must be a positive number.")
+            error_present = True
+    except ValueError:
+        st.error("Notification price must be a valid number.")
+        error_present = True
+    if error_present:
+        return None
     else:
         track_product(user_id, url, notification_price)
 

@@ -325,7 +325,6 @@ def display_charts(product_id) -> alt.Chart:
 
     most_recent_timestamp = df['Date'].max()
 
-    # Filter data based on the selected time range
     if time_range == "Last 30 Minutes" or time_range == "Last 24 Hours":
         filtered_df = df[df['Date'] >= (
             most_recent_timestamp - time_ranges[time_range])].copy()

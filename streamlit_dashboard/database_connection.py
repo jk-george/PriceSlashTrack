@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 import psycopg2
 
 
+load_dotenv()
+
+
 def get_connection():
     """Gets connection to the database"""
     try:
@@ -33,5 +36,4 @@ def get_cursor(conn):
 
 
 if __name__ == "__main__":
-    load_dotenv()
     print(get_connection())

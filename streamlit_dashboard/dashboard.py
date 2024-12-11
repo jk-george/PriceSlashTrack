@@ -1,7 +1,7 @@
 """Runs the streamlit dashboard"""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 import altair as alt
 import streamlit as st
@@ -284,14 +284,79 @@ def get_latest_price(product_id) -> float:
 
 def display_charts(product_id) -> alt.Chart:
     """Displays charts for a product"""
+    if not product_id:
+        st.warning("Please select a valid product.")
+        return None
+
     conn = get_connection()
     cursor = get_cursor(conn)
-    query = """SELECT price, timestamp FROM price_changes WHERE product_id = %s"""
+
+    query = """
+    SELECT price, timestamp 
+    FROM price_changes 
+    WHERE product_id = %s
+    ORDER BY timestamp
+    """
+
     cursor.execute(query, (product_id,))
     result = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    if not result:
+        st.warning(f"No price data available for Product ID {product_id}.")
+        return None
+
     df = pd.DataFrame(result, columns=['Price', 'Date'])
-    return alt.Chart(df).mark_line().encode(
-        x='Date:T', y='Price:Q')
+
+    df['Date'] = pd.to_datetime(df['Date'], utc=True)
+
+    current_time = pd.Timestamp.now(tz='UTC')
+    time_ranges = {
+        "Last 3 Days": timedelta(days=3),
+        "Last 24 Hours": timedelta(hours=24),
+        "Last 30 Minutes": timedelta(minutes=30),
+    }
+
+    time_range = st.selectbox(
+        "Select Time Range", list(time_ranges.keys()))
+
+    most_recent_timestamp = df['Date'].max()
+
+    if time_range == "Last 30 Minutes" or time_range == "Last 24 Hours":
+        filtered_df = df[df['Date'] >= (
+            most_recent_timestamp - time_ranges[time_range])].copy()
+
+        filtered_df.loc[:, 'FormattedDate'] = filtered_df['Date'].dt.strftime(
+            '%H:%M')
+    else:
+        filtered_df = df[df["Date"] >= (
+            current_time - time_ranges[time_range])].copy()
+
+        filtered_df.loc[:, 'FormattedDate'] = filtered_df['Date'].dt.strftime(
+            '%Y-%m-%d %H:%M:%S')
+
+    if filtered_df.empty:
+        st.warning("No price data available for the selected time range.")
+        return None
+
+    chart = alt.Chart(filtered_df).mark_line().encode(
+        x=alt.X('FormattedDate:N',
+                title='Timestamp',
+                axis=alt.Axis(
+                    labelAngle=-45,
+                    tickCount=10
+                )),
+        y=alt.Y('Price:Q', title='Price'),
+        tooltip=['Date:T', 'Price:Q']
+    ).properties(
+        width=700,
+        height=400,
+        title=f"Price Changes - {time_range}"
+    )
+
+    return chart
 
 
 def login(email: str, password: str) -> bool:

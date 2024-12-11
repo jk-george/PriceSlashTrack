@@ -18,7 +18,7 @@ from bs4 import BeautifulSoup
 from connect_to_database import get_connection, get_cursor
 
 QUERY_TO_FIND_URLS = """
-SELECT product_id,url FROM product;
+SELECT product_id,url FROM product WHERE product_id = 15;
 """
 
 
@@ -65,7 +65,7 @@ def get_html_from_url(web_page: str) -> bytes:
         return get_html_with_age_gate_bypass(web_page)
 
     try:
-        html = requests.get(web_page, timeout=20)
+        html = requests.get(web_page, timeout=30)
     except requests.exceptions.MissingSchema:
         return "That URL does not exist."
     except requests.exceptions.ConnectionError:
@@ -88,21 +88,18 @@ def get_website_from_url(url: str) -> str:
 
 
 def scrape_pricing_process(html_content: bytes, url: str, product_id: int) -> dict:
-    """ Chooses which scraper to use based off of the URL """
+    """Chooses which scraper to use based off of the URL."""
 
     website_url = get_website_from_url(url)
 
     if "https://store.steampowered.com" in website_url:
         return scrape_from_steam_html(html_content, url, product_id)
 
-    # if "https://www.amazon.com" in url or "https://www.amazon.co." in website_url:
-    #     return scrape_from_amazon_html(html_content, url, product_id)
-
     if "https://www.debenhams.com" in website_url:
         return scrape_from_debenhams_html(html_content, url, product_id)
 
     logging.error(
-        "Cannot scrape that URL, since it's not an Amazon/Steam webpage.")
+        "Cannot scrape that URL, since it's not a Debenhams/Steam webpage.")
     return
 
 
@@ -132,6 +129,22 @@ def scrape_from_debenhams_html(html_content: bytes, url: str, product_id: int) -
     original_price = original_price_element.text.strip(
     ) if original_price_element else current_price
 
+# product description and images
+    product_description_element = s.find(
+        "div", class_="prose")
+    if not product_description_element:
+        logging.error(
+            "Cannot find product_description element for URL: %s", url)
+        return None
+    product_description = product_description_element.text.strip()
+
+    image_url_element = s.find(
+        'img', attrs={'class': 'h-auto w-auto object-cover undefined undefined'})
+    if not image_url_element:
+        logging.error("Cannot find image element for URL: %s", url)
+        image_url_element = None
+    image_url = image_url_element['src']
+
     product_information = {
         "product_id": product_id,
         "original_price": original_price,
@@ -140,38 +153,6 @@ def scrape_from_debenhams_html(html_content: bytes, url: str, product_id: int) -
         "website": get_website_from_url(url)
     }
 
-    print(product_information)
-    return product_information
-
-
-def scrape_from_amazon_html(html_content: bytes, url: str, product_id: int) -> dict:
-    """Scrapes product, price and website information from Amazon."""
-    s = BeautifulSoup(html_content, 'html.parser')
-
-    results = s.find("div", id="corePriceDisplay_desktop_feature_div")
-
-    if not results:
-        logging.error("Can't scrape from that Amazon URL")
-        return None
-
-    product_title_element = s.find(id="productTitle")
-
-    if not product_title_element:
-        logging.error("Cannot find game title on the page for URL: %s", url)
-        return None
-
-    discount_price = results.find(
-        "span", class_="a-price aok-align-center reinventPricePriceToPayMargin priceToPay").text
-    original_price = results.find(
-        "div",
-        class_="a-section a-spacing-small aok-align-center").find("span", class_="a-offscreen").text
-    product_title = product_title_element.text.strip()
-
-    product_information = {"product_id": product_id,
-                           "original_price": original_price,
-                           "discount_price": discount_price,
-                           "game_title": product_title,
-                           "website": get_website_from_url(url)}
     print(product_information)
     return product_information
 

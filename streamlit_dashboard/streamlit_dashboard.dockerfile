@@ -5,6 +5,6 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY dashboard.py .
-COPY dashboard_connection.py .
+COPY database_connection.py .
 
 CMD ["streamlit","run","dashboard.py"]

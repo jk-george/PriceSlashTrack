@@ -1,7 +1,6 @@
+"""Unit Tests for removing subscribers script."""
 # pylint: skip-file
-import unittest
 import pytest
-from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 from remove_subscribers import (get_product_ids_from_table, delete_from_table,
                                 delete_unsubscribed_data, main_remove_subscriptions)
@@ -82,7 +81,7 @@ def test_delete_unsubscribed_data_error(mock_conn, mock_cursor):
 
 @patch('remove_subscribers.get_connection')
 def test_main_remove_subscriptions_valid(mock_get_connection, mock_conn, mock_cursor):
-    """Tests main function for cleaning the product, price changes and websites schema sucessfully"""
+    """Tests main function for cleaning the product, price changes and websites schema successfully."""
     mock_conn.cursor.return_value = mock_cursor
     mock_get_connection.return_value.__enter__.return_value = mock_conn
 

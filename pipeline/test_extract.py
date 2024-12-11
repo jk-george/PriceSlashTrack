@@ -10,19 +10,19 @@ def test_scrape_pricing_process_only_accepts_amazon_and_steam():
 
 
 def test_website_finder_finds_com_websites():
-    """ Tests if .com/asdasf gets replaced correctly. """
+    """Tests if .com/asdasf gets replaced correctly."""
     assert get_website_from_url(
         "something.com/something-else") == "something.com"
 
 
 def test_website_finder_finds_co_uk_websites():
-    """ Tests if .co.uk/sasda gets replaced correctly"""
+    """Tests if .co.uk/sasda gets replaced correctly."""
     assert get_website_from_url(
         "something.co.uk/something-else") == "something.co.uk"
 
 
 def test_url_is_not_valid_returns_error_message():
-    """ Tests if an invalid URL gets caught. """
+    """Tests if an invalid URL gets caught."""
     assert get_html_from_url(
         "https://random_url") == "Cannot connect to that URL."
     assert get_html_from_url("random_url") == "That URL does not exist."
@@ -40,7 +40,7 @@ def html_object():
 
 
 def test_scraper_gets_correct_steam_original_and_discount_price(html_object):
-    """ Tests to see that the scraper can get a steam original and discount price. """
+    """Tests to see that the scraper can get a steam original and discount price."""
     url = "https://store.steampowered.com/app/1284190/The_Planet_Crafter/"
     test_product_info = scrape_from_steam_html(html_object, url, 1)
     assert test_product_info.get("original_price") == "£19.99"

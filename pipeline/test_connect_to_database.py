@@ -1,4 +1,4 @@
-"""Unit Tests for connecting to database script"""
+"""Unit Tests for connecting to database."""
 # pylint: skip-file
 import pytest
 from unittest.mock import patch, MagicMock

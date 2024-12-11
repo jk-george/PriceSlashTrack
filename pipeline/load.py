@@ -7,18 +7,16 @@ from connect_to_database import configure_logging, get_connection
 
 def insert_price_change(conn: connection, product_id: int, price: float, timestamp: str) -> None:
     """Inserts values into price_changes schema"""
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO price_changes (price, product_id, timestamp)
-                VALUES (%s, %s, %s);
-                """,
-                (price, product_id, timestamp)
-            )
-        logging.info("Inserted price for product_id %s", product_id)
-    except Exception as e:
-        logging.error("Error inserting price: %s", e)
+
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO price_changes (price, product_id, timestamp)
+            VALUES (%s, %s, %s);
+            """,
+            (price, product_id, timestamp)
+        )
+    logging.info("Inserted price for product_id %s", product_id)
 
 
 def product_id_exists(conn: connection, product_id: int) -> bool:
@@ -40,19 +38,17 @@ def load_price_changes(products_data: list[dict], conn: connection) -> None:
             logging.error("Invalid product values: %s", product)
             continue
 
-        if product["price"] < 0:
+        try:
+            insert_price_change(
+                conn,
+                product["product_id"],
+                product["price"],
+                product["timestamp"]
+            )
+            successfully_inserted += 1
+        except Exception as e:
+            logging.error("Failed to insert product data: %s", product)
             continue
-
-        if not product_id_exists(conn, product["product_id"]):
-            continue
-
-        insert_price_change(
-            conn,
-            product["product_id"],
-            product["price"],
-            product["timestamp"]
-        )
-        successfully_inserted += 1
 
     try:
         if successfully_inserted > 0:

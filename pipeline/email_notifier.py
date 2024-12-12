@@ -106,7 +106,7 @@ def determine_if_increase_or_decrease(percentage: float) -> str:
     """Determines if percentage is increase"""
     if percentage > 0:
         return "decreased"
-    elif percentage < 0:
+    else:
         return "increased"
 
 

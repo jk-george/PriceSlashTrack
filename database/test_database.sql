@@ -6,8 +6,8 @@ VALUES
 
 INSERT INTO website (website_name)
 VALUES 
-    ('Steam'),
-    ('Debenhams');
+    ('https://store.steampowered.com'),
+    ('https://www.debenhams.com');
 
 INSERT INTO product (product_name, url, website_id, original_price, product_description, image_url)
 VALUES 

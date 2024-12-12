@@ -19,7 +19,7 @@ AWS_ACCESS_KEY_ID=<your_aws_access_key>
 AWS_SECRET_ACCESS_KEY=<your_aws_secret_access_key>
 
 # Email Configuration
-FROM_EMAIL=<your_sending_email>
+FROM_EMAIL=<your-verified-ses-sender-email>
 
 # RDS Configuration
 DB_USER=<database_username>

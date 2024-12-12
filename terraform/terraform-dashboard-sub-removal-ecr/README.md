@@ -10,7 +10,7 @@ Please read the README located in the top-level Terraform folder for detailed in
 
 1. Create a `terraform.tfvars` file and fill it with the following variables:
 ```bash
-Necessary variables to be updated later - please follow same structure as in the top level Terraform README!
+DASHBOARD_ECR_NAME = "your-dashboard-ecr-repo-name"
 ```
 
 2. Initialise Terraform:

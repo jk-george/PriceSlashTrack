@@ -34,7 +34,7 @@ resource "aws_db_instance" "c14-price_slash_db" {
     skip_final_snapshot          = true
     db_subnet_group_name         = "c14-public-subnet-group"
     vpc_security_group_ids       = [aws_security_group.c14-price_slash_sg.id]
-    username                     = var.DB_USERNAME
+    username                     = var.DB_USER
     password                     = var.DB_PASSWORD
 }
 

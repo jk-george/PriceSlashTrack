@@ -10,7 +10,18 @@ Please read the README located in the top-level Terraform folder for detailed in
 
 1. Create a `terraform.tfvars` file and fill it with the following variables:
 ```bash
-Necessary variables to be updated later - please follow same structure as in the top level Terraform README!
+# AWS Credentials
+AWS_ACCESS_KEY = "your-aws-access-key"
+AWS_SECRET_KEY = "your-aws-secret-key"
+FROM_EMAIL = "your-verified-ses-sender-email"
+DASHBOARD_ECR_NAME = "your-dashboard-ecr-repo-name"
+
+# RDS Database Config
+DB_HOST = "the-rds-host-address"
+DB_USER = "the-rds-username"
+DB_PASSWORD = "the-rds-password"
+DB_NAME = "the-rds-name"
+DB_PORT = "the-rds-port-number"
 ```
 
 2. Initialise Terraform:

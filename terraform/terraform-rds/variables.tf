@@ -6,7 +6,7 @@ variable "AWS_SECRET_ACCESS_KEY" {
     type = string
 }
 
-variable "DB_USERNAME" {
+variable "DB_USER" {
     type = string
 }
 

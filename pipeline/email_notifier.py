@@ -99,15 +99,15 @@ def send_email(to_address: str, subject: str, body: str) -> None:
 
 def calculate_percentage_decrease(initial: float, final: float) -> float:
     """Calculates the percentage decrease between two numbers"""
-    return round(((final - initial)/final)*100)
+    return round(((initial - final)/initial)*100)
 
 
 def determine_if_increase_or_decrease(percentage: float) -> str:
     """Determines if percentage is increase"""
     if percentage > 0:
-        return "increased"
-    elif percentage < 0:
         return "decreased"
+    elif percentage < 0:
+        return "increased"
 
 
 def check_and_notify() -> None:

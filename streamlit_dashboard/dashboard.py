@@ -15,10 +15,11 @@ from database_connection import (get_connection, get_cursor,
 from dashboard_etl import (get_html_from_url, get_website_from_url,
                            scrape_pricing_process, clean_price)
 
+from homepage import home_page
 
-st.set_page_config(
-    layout="wide"
-)
+st.set_page_config(page_title="Price Slashers - Sales Tracker",
+                   page_icon="💸", layout="wide")
+st.logo("logo.png", size='large')
 
 header_section = st.container()
 main_section = st.container()

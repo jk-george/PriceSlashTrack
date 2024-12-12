@@ -31,7 +31,7 @@ def get_subscriptions_and_products(conn: connection) -> list[tuple[int, float, s
 
     with get_cursor(conn) as cur:
         cur.execute("""
-            SELECT s.product_id, s.notification_price, p.product_name, u.email_address
+            SELECT s.product_id, s.notification_price, p.product_name, u.email_address, u.first_name, u.last_name
             FROM subscription s
             JOIN product p ON s.product_id = p.product_id
             JOIN users u ON s.user_id = u.user_id
@@ -98,16 +98,16 @@ def send_email(to_address: str, subject: str, body: str) -> None:
 
 
 def calculate_percentage_decrease(initial: float, final: float) -> float:
-    """Calculates the percentage decrease between two numbers"""
-    return round(((final - initial)/final)*100, 2)
+    """Calculates the percentage decrease between two numbers."""
+    return round(((initial - final)/initial)*100)
 
 
 def determine_if_increase_or_decrease(percentage: float) -> str:
     """Determines if percentage is increase"""
     if percentage > 0:
-        return "increased"
-    elif percentage < 0:
         return "decreased"
+    else:
+        return "increased"
 
 
 def check_and_notify() -> None:
@@ -117,13 +117,17 @@ def check_and_notify() -> None:
     with get_connection() as conn:
         subscriptions = get_subscriptions_and_products(conn)
 
-        for product_id, notification_price, product_name, customer_email in subscriptions:
+        for product_id, notification_price, product_name, customer_email, first_name, last_name in subscriptions:
             current_price = get_current_product_price(conn, product_id)
 
             if current_price is None:
                 logging.warning("Product %s with ID %s not found.",
                                 product_name, product_id)
                 continue
+
+            percentage_change = calculate_percentage_decrease(
+                notification_price, current_price)
+            change_type = determine_if_increase_or_decrease(percentage_change)
 
             if current_price < notification_price:
                 with get_cursor(conn) as cur:
@@ -146,8 +150,15 @@ def check_and_notify() -> None:
                     continue
 
                 subject = f"Price Drop Alert: {product_name}"
-                body = (f"""The price for {product_name} has dropped below your threshold of £{
-                        notification_price}! The current price is £{current_price}. Hurry before this sale ends!""")
+                body = (f"Dear {first_name} {last_name},\n\n"
+                        f"The price for {product_name} has "
+                        f"{change_type} by {abs(percentage_change)}%!\n"
+                        "It is now"
+                        f" £{current_price}, dropping below your threshold of "
+                        f"£{notification_price}."
+                        " Hurry before this sale ends!\n"
+                        "Best wishes and happy shopping,\n"
+                        "The Price Slashers Team.")
 
                 send_email(customer_email, subject, body)
 
@@ -156,6 +167,5 @@ def check_and_notify() -> None:
 
 
 if __name__ == "__main__":
-
     configure_logging()
     check_and_notify()

@@ -576,8 +576,9 @@ def show_main_page():
     """Displays the main page on the dashboard"""
     with main_section:
         with st.sidebar:
+            st.title("Price Slasher Sales Tracker")
             page = option_menu(
-                menu_title="Menu", options=["About", "Current products", "Track new products"])
+                menu_title="", options=["About", "Current products", "Track new products"], icons=["question-circle", "bag", "plus-lg"])
             st.button("Log Out", key="logout", on_click=logged_out_clicked)
 
         user_id = st.session_state.get('user_id')
@@ -728,7 +729,6 @@ def show_login_page() -> None:
 if __name__ == "__main__":
 
     with header_section:
-        st.title("Sales Tracker")
 
         if 'logged_in' not in st.session_state:
             st.session_state['logged_in'] = False

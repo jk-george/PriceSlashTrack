@@ -2,6 +2,7 @@
 
 from os import environ as ENV
 import logging
+from dotenv import load_dotenv
 
 import boto3
 from boto3.exceptions import Boto3Error
@@ -75,8 +76,16 @@ def log_notification_sent(conn: connection, user_id: int, product_id: int, price
         """, (user_id, product_id, price))
 
 
-def send_email(to_address: str, subject: str, body: str) -> None:
+def send_email(to_address: str, subject: str, body: str, test_mode: bool = False) -> None:
     """Sends an email using SES."""
+
+    if test_mode:
+        print("=== TEST MODE: Email Notification ===")
+        print(f"To: {to_address}")
+        print(f"Subject: {subject}")
+        print(f"Body:\n{body}")
+        print("=====================================")
+        return
 
     ses_client = get_ses_client()
 
@@ -99,7 +108,7 @@ def send_email(to_address: str, subject: str, body: str) -> None:
 
 def calculate_percentage_decrease(initial: float, final: float) -> float:
     """Calculates the percentage decrease between two numbers"""
-    return round(((final - initial)/final)*100, 2)
+    return round(((final - initial)/final)*100)
 
 
 def determine_if_increase_or_decrease(percentage: float) -> str:
@@ -110,7 +119,7 @@ def determine_if_increase_or_decrease(percentage: float) -> str:
         return "decreased"
 
 
-def check_and_notify() -> None:
+def check_and_notify(test_mode: bool = False) -> None:
     """Checks product prices and notifies users via email if the price
     drops below their notification threshold."""
 
@@ -124,6 +133,10 @@ def check_and_notify() -> None:
                 logging.warning("Product %s with ID %s not found.",
                                 product_name, product_id)
                 continue
+
+            percentage_change = calculate_percentage_decrease(
+                notification_price, current_price)
+            change_type = determine_if_increase_or_decrease(percentage_change)
 
             if current_price < notification_price:
                 with get_cursor(conn) as cur:
@@ -146,16 +159,22 @@ def check_and_notify() -> None:
                     continue
 
                 subject = f"Price Drop Alert: {product_name}"
-                body = (f"""The price for {product_name} has dropped below your threshold of £{
-                        notification_price}! The current price is £{current_price}. Hurry before this sale ends!""")
+                body = (f"""The price for {product_name} has {change_type} by {abs(percentage_change)}%! It is now £{current_price}, dropping below your threshold of £{
+                        notification_price}! Hurry before this sale ends!""")
 
-                send_email(customer_email, subject, body)
+                send_email(customer_email, subject, body, test_mode=test_mode)
 
                 logging.info("Notified %s about price drop for %s.",
                              customer_email, product_name)
 
 
 if __name__ == "__main__":
+    import sys
+    load_dotenv()
 
     configure_logging()
-    check_and_notify()
+
+    test_mode = "test" in sys.argv
+    if test_mode:
+        logging.info("Running in test mode.")
+    check_and_notify(test_mode=test_mode)

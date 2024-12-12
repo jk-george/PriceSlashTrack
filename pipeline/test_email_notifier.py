@@ -110,8 +110,8 @@ def test_check_and_notify_price_drop():
     mock_connection.cursor.return_value = mock_cursor
 
     mock_cursor.fetchall.return_value = [
-        (1, 10.0, "Product A", "user@example.com")]
-
+        (1, 10.0, "Product A", "user@example.com", "John", "Doe")
+    ]
     mock_cursor.fetchone.side_effect = [
         {"price": 5.0},
         {"user_id": 1}
@@ -126,14 +126,25 @@ def test_check_and_notify_price_drop():
     }), mock.patch("email_notifier.get_connection", return_value=mock_connection), \
             mock.patch("email_notifier.get_ses_client", return_value=mock_ses_client), \
             mock.patch("email_notifier.has_notification_been_sent", return_value=False):
+
         check_and_notify()
+
+    expected_subject = "Price Drop Alert: Product A"
+    expected_body = (
+        "Dear John Doe,\n\n"
+        "The price for Product A has decreased by 50%!\n"
+        "It is now £5.0, dropping below your threshold of £10.0. "
+        "Hurry before this sale ends!\n"
+        "Best wishes and happy shopping,\n"
+        "The Price Slashers Team."
+    )
 
     mock_ses_client.send_email.assert_called_once_with(
         Source="test@example.com",
         Destination={"ToAddresses": ["user@example.com"]},
         Message={
-            "Subject": {"Data": "Price Drop Alert: Product A"},
-            "Body": {"Text": {"Data": "The price for Product A has dropped below your threshold of 10.0! The current price is 5.0. Hurry before this sale ends!"}}
+            "Subject": {"Data": expected_subject},
+            "Body": {"Text": {"Data": expected_body}}
         }
     )
 

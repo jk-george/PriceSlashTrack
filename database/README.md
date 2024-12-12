@@ -4,6 +4,12 @@ This module contains the schema for the database and SQL file with test data tha
 ## 📋 Overview 
 The database created is a PostgreSQL database, hosted on an AWS RDS instance.
 
+## Entity Relationship Diagram
+
+![ERD](../diagrams/ERD.png)
+
+This Entity-Relationship Diagram (ERD) provides a high-level overview of the database schema, showcasing the relationships between key entities such as `users`, `products`, `websites`, `subscriptions`, `price_changes`, and `notifications_sent`. This structure has been normalised to 3NF and supports functionalities like tracking price changes, managing user subscriptions, and sending notifications for price drop events.
+
 ## 🛠️ Prerequisites
 - **AWS RDS (PostgreSQL)** database running (please navigate to the `terraform-rds` subfolder within the `terraform` folder for further instructions on how to set up the database).
 

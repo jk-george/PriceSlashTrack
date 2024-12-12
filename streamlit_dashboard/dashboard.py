@@ -516,7 +516,7 @@ def show_about_page():
     """Displays the About page with project overview and instructions."""
     st.header("📖 About")
     st.markdown("""
-    🛒 **Welcome to Price Tracker!**
+    ### 🛒 **Welcome to Price Tracker!**
 
     Price Tracker is a tool designed to help you monitor the prices of your favorite products, track price changes over time, and get notified when prices drop below your desired threshold. 
 
@@ -618,9 +618,9 @@ def show_main_page():
             user_id = st.session_state.get('user_id')
             user_name = get_user_name(user_id)
             if user_name:
-                st.title(f"{user_name}'s Current Products")
+                st.header(f"{user_name}'s Current Products")
             else:
-                st.title("Current Products")
+                st.header("Current Products")
 
             product_subscriptions = get_product_subscription(user_id)
 

@@ -359,7 +359,7 @@ def display_charts(product_id) -> alt.Chart:
         y=alt.Y('Price:Q', title='Price'),
         tooltip=['Date:T', 'Price:Q']
     ).properties(
-        width=700,
+        width=500,
         height=400,
         title=f"Price Changes - {time_range}"
     )
@@ -516,7 +516,7 @@ def show_about_page():
     """Displays the About page with project overview and instructions."""
     st.header("📖 About")
     st.markdown("""
-    🛒 **Welcome to Price Tracker!**
+    ### 🛒 **Welcome to Price Tracker!**
 
     Price Tracker is a tool designed to help you monitor the prices of your favorite products, track price changes over time, and get notified when prices drop below your desired threshold. 
 
@@ -548,29 +548,57 @@ def view_product(product_id, user_id):
             product_id)
         latest_price = get_latest_price(product_id)
         st.header(f"{product_name}")
-        if image_url:
-            st.image(image_url)
+        c1, c2 = st.columns(2)
+        with c1:
+            if image_url:
+                st.container(height=1, border=False)
+                st.image(image_url)
+            if product_description:
+                st.markdown(f"**Description:** {product_description}")
+            st.markdown(f"""**Current price:** £{latest_price}""")
+            st.markdown(f"""**Original price:** £{original_price}""")
+            st.markdown(f"""[**Link to product**]({url})""")
+        with c2:
+            st.altair_chart(display_charts(product_id))
+        col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(
+            8, gap="small")
+        with col1:
+            if st.button("Back"):
+                del st.session_state["current_product"]
+                st.rerun()
+        with col2:
+            if st.button("Unsubscribe"):
+                stop_tracking_product(user_id, product_id)
+                st.toast(f"""You unsubscribed from tracking {product_name}""")
 
-        if product_description:
-            st.markdown(f"**Description:** {product_description}")
-        st.markdown(f"""**Current price:** £{latest_price}""")
-        st.markdown(f"""**Original price:** £{original_price}""")
-        st.markdown(f"""[**Link to product**]({url})""")
-        st.altair_chart(display_charts(product_id))
-        if st.button("Return"):
-            del st.session_state["current_product"]
-            st.rerun()
-        if st.button("Unsubscribe"):
-            stop_tracking_product(user_id, product_id)
-            st.toast(f"""You unsubscribed from tracking {product_name}""")
+
+def get_user_name(user_id: int):
+    """Returns the first and last name of the user from the database."""
+
+    conn = get_connection()
+    cursor = get_cursor(conn)
+    cursor.execute(
+        """
+        SELECT first_name
+        FROM users
+        WHERE user_id = %s;
+        """, (user_id,)
+    )
+    result = cursor.fetchone()
+    if result:
+        first_name = result[0]
+        return first_name
+    else:
+        return None
 
 
 def show_main_page():
     """Displays the main page on the dashboard"""
     with main_section:
         with st.sidebar:
+            st.title("Price Slasher Sales Tracker")
             page = option_menu(
-                menu_title="Menu", options=["About", "Current products", "Track new products"])
+                menu_title="", options=["About", "Current products", "Track new products"], icons=["question-circle", "bag", "plus-lg"])
             st.button("Log Out", key="logout", on_click=logged_out_clicked)
 
         user_id = st.session_state.get('user_id')
@@ -578,10 +606,8 @@ def show_main_page():
             view_product(st.session_state.current_product, user_id)
             return
         if page == "About":
-            st.session_state["About"] = True
             show_about_page()
         elif page == "Track new products":
-            st.session_state["Track new products"] = True
             st.header("Track a new product")
             url = st.text_input("Enter a new product URL: ")
             notification_price = st.text_input(
@@ -589,8 +615,13 @@ def show_main_page():
             st.button("Track", on_click=track_clicked,
                       args=(user_id, url, notification_price))
         elif page == "Current products":
-            st.session_state["Current products"] = True
             user_id = st.session_state.get('user_id')
+            user_name = get_user_name(user_id)
+            if user_name:
+                st.header(f"{user_name}'s Current Products")
+            else:
+                st.header("Current Products")
+
             product_subscriptions = get_product_subscription(user_id)
 
             if not product_subscriptions:
@@ -721,7 +752,6 @@ def show_login_page() -> None:
 if __name__ == "__main__":
 
     with header_section:
-        st.title("Sales Tracker")
 
         if 'logged_in' not in st.session_state:
             st.session_state['logged_in'] = False

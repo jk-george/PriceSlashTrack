@@ -3,7 +3,6 @@ altair
 streamlit
 streamlit_option_menu
 beautifulsoup4
-streamlit-shadcn-ui
 streamlit_card
 bs4
 psycopg2-binary

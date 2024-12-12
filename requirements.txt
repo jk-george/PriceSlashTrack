@@ -10,3 +10,4 @@ streamlit
 pandas
 altair
 streamlit-option-menu
+streamlit_card

@@ -18,7 +18,6 @@ from dashboard_etl import (get_html_from_url, get_website_from_url,
 
 st.set_page_config(page_title="Price Slashers - Sales Tracker",
                    page_icon="💸", layout="wide")
-st.logo("logo.png", size='large')
 
 header_section = st.container()
 main_section = st.container()
@@ -265,6 +264,7 @@ def show_main_page():
     """Displays the main page on the dashboard"""
     with main_section:
         with st.sidebar:
+            st.logo("logo.png", size='large')
             st.title("Price Slasher Sales Tracker")
             page = option_menu(
                 menu_title="", options=["About", "Current products", "Track new products"], icons=["question-circle", "bag", "plus-lg"])

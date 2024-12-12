@@ -560,7 +560,7 @@ def view_product(product_id, user_id):
         col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(
             8, gap="small")
         with col1:
-            if st.button("Return"):
+            if st.button("Back"):
                 del st.session_state["current_product"]
                 st.rerun()
         with col2:

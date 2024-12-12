@@ -359,7 +359,7 @@ def display_charts(product_id) -> alt.Chart:
         y=alt.Y('Price:Q', title='Price'),
         tooltip=['Date:T', 'Price:Q']
     ).properties(
-        width=700,
+        width=500,
         height=400,
         title=f"Price Changes - {time_range}"
     )
@@ -548,15 +548,18 @@ def view_product(product_id, user_id):
             product_id)
         latest_price = get_latest_price(product_id)
         st.header(f"{product_name}")
-        if image_url:
-            st.image(image_url)
-
-        if product_description:
-            st.markdown(f"**Description:** {product_description}")
-        st.markdown(f"""**Current price:** £{latest_price}""")
-        st.markdown(f"""**Original price:** £{original_price}""")
-        st.markdown(f"""[**Link to product**]({url})""")
-        st.altair_chart(display_charts(product_id))
+        c1, c2 = st.columns(2)
+        with c1:
+            if image_url:
+                st.container(height=1, border=False)
+                st.image(image_url)
+            if product_description:
+                st.markdown(f"**Description:** {product_description}")
+            st.markdown(f"""**Current price:** £{latest_price}""")
+            st.markdown(f"""**Original price:** £{original_price}""")
+            st.markdown(f"""[**Link to product**]({url})""")
+        with c2:
+            st.altair_chart(display_charts(product_id))
         col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(
             8, gap="small")
         with col1:

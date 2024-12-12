@@ -98,7 +98,7 @@ def send_email(to_address: str, subject: str, body: str) -> None:
 
 
 def calculate_percentage_decrease(initial: float, final: float) -> float:
-    """Calculates the percentage decrease between two numbers"""
+    """Calculates the percentage decrease between two numbers."""
     return round(((initial - final)/initial)*100)
 
 

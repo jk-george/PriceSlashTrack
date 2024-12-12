@@ -151,10 +151,11 @@ def check_and_notify() -> None:
 
                 subject = f"Price Drop Alert: {product_name}"
                 body = (f"Dear {first_name} {last_name},\n\n"
-                        f"The price for {product_name} has {
-                            change_type} by {abs(percentage_change)}%!\n"
-                        f"It is now £{current_price}, dropping below your threshold of £{
-                            notification_price}."
+                        f"The price for {product_name} has "
+                        f"{change_type} by {abs(percentage_change)}%!\n"
+                        f"It is now £{
+                            current_price}, dropping below your threshold of "
+                        f"£{notification_price}."
                         " Hurry before this sale ends!\n"
                         "Best wishes and happy shopping,\n"
                         "The Price Slashers Team.")

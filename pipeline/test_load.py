@@ -1,7 +1,7 @@
 """Unit Tests for the loading process of the pipeline."""
 # pylint: skip-file
 from unittest.mock import Mock, patch, MagicMock
-from load import insert_price_change, load_price_changes
+from load import insert_price_change, load_price_changes, product_id_exists
 
 
 def test_insert_price_change_valid():
@@ -14,6 +14,46 @@ def test_insert_price_change_valid():
     mock_cursor.execute.assert_called_once()
     assert mock_cursor.execute.call_args[0][1] == (
         22.49, 1, "2024-12-04 16:31:40")
+
+
+def test_insert_price_change_invalid():
+    """Test that exception is raised for invalid querying."""
+    mock_conn = MagicMock()
+    mock_cursor = mock_conn.cursor.return_value.__enter__.return_value
+    mock_cursor.execute.side_effect = Exception("Database error")
+
+    try:
+        insert_price_change(mock_conn, 1, 22.49, "2024-12-04 16:31:40")
+        assert False, "Expected exception not raised"
+    except Exception:
+        assert "Database error"
+
+
+@patch("load.product_id_exists")
+def test_product_id_exists_valid(mock_product_id_exists):
+    """Test product_id_exists returns True when product_id exists."""
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+
+    result = product_id_exists(mock_conn, 1)
+    assert result == True
+    mock_cursor.execute.assert_called_once_with(
+        "SELECT * FROM product WHERE product_id = %s", (1,))
+
+
+@patch("load.product_id_exists")
+def test_product_id_exists_invalid(mock_product_id_exists):
+    """Test product_id_exists returns False when product_id doesn't exist."""
+    mock_conn = MagicMock()
+    mock_cursor = mock_conn.cursor.return_value.__enter__.return_value
+    mock_cursor.fetchone.return_value = None
+
+    result = product_id_exists(mock_conn, 1)
+    assert result == False
+    mock_cursor.execute.assert_called_once_with(
+        "SELECT * FROM product WHERE product_id = %s", (1,)
+    )
 
 
 @patch("load.product_id_exists")

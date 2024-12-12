@@ -224,6 +224,12 @@ def show_track_page():
 def show_current_products_page():
     """Displays the current products"""
     user_id = st.session_state.get('user_id')
+    user_name = get_user_name(user_id)
+
+    if user_name:
+        st.title(f"{user_name}'s Current Products")
+    else:
+        st.title("Current Products")
     product_subscriptions = get_product_subscription(user_id)
     if not product_subscriptions:
         st.markdown("You are not currently tracking anything!")

@@ -352,7 +352,6 @@ def show_home_page() -> None:
     """Displays streamlit home page"""
     with login_section:
         with st.sidebar:
-            st.logo("logo.png", size='large')
             st.title("Price Slashers Login")
             page = option_menu(
                 menu_title="", options=["Home Page", "Login Page"])

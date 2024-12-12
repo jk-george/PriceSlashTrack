@@ -97,6 +97,19 @@ def send_email(to_address: str, subject: str, body: str) -> None:
         logging.error("Error sending email: %s", e)
 
 
+def calculate_percentage_decrease(initial: float, final: float) -> float:
+    """Calculates the percentage decrease between two numbers"""
+    return round(((final - initial)/final)*100, 2)
+
+
+def determine_if_increase_or_decrease(percentage: float) -> str:
+    """Determines if percentage is increase"""
+    if percentage > 0:
+        return "increased"
+    elif percentage < 0:
+        return "decreased"
+
+
 def check_and_notify() -> None:
     """Checks product prices and notifies users via email if the price
     drops below their notification threshold."""
@@ -133,8 +146,8 @@ def check_and_notify() -> None:
                     continue
 
                 subject = f"Price Drop Alert: {product_name}"
-                body = (f"""The price for {product_name} has dropped below your threshold of {
-                        notification_price}! The current price is {current_price}. Hurry before this sale ends!""")
+                body = (f"""The price for {product_name} has dropped below your threshold of £{
+                        notification_price}! The current price is £{current_price}. Hurry before this sale ends!""")
 
                 send_email(customer_email, subject, body)
 

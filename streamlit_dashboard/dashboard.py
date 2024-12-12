@@ -572,6 +572,26 @@ def view_product(product_id, user_id):
                 st.toast(f"""You unsubscribed from tracking {product_name}""")
 
 
+def get_user_name(user_id: int):
+    """Returns the first and last name of the user from the database."""
+
+    conn = get_connection()
+    cursor = get_cursor(conn)
+    cursor.execute(
+        """
+        SELECT first_name
+        FROM users
+        WHERE user_id = %s;
+        """, (user_id,)
+    )
+    result = cursor.fetchone()
+    if result:
+        first_name = result[0]
+        return first_name
+    else:
+        return None
+
+
 def show_main_page():
     """Displays the main page on the dashboard"""
     with main_section:
@@ -586,10 +606,8 @@ def show_main_page():
             view_product(st.session_state.current_product, user_id)
             return
         if page == "About":
-            st.session_state["About"] = True
             show_about_page()
         elif page == "Track new products":
-            st.session_state["Track new products"] = True
             st.header("Track a new product")
             url = st.text_input("Enter a new product URL: ")
             notification_price = st.text_input(
@@ -597,8 +615,13 @@ def show_main_page():
             st.button("Track", on_click=track_clicked,
                       args=(user_id, url, notification_price))
         elif page == "Current products":
-            st.session_state["Current products"] = True
             user_id = st.session_state.get('user_id')
+            user_name = get_user_name(user_id)
+            if user_name:
+                st.title(f"{user_name}'s Current Products")
+            else:
+                st.title("Current Products")
+
             product_subscriptions = get_product_subscription(user_id)
 
             if not product_subscriptions:

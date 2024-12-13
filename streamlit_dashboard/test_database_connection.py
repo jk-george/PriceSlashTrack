@@ -251,7 +251,7 @@ def test_create_account_valid():
 
             result = create_account(
                 "John", "Doe", "john@email.com", "password123")
-            assert result is True
+            assert result == True
 
 
 def test_create_account_invalid():
@@ -266,7 +266,7 @@ def test_create_account_invalid():
 
             result = create_account(
                 "John", "Doe", "john@email.com", "password123")
-            assert result is False
+            assert result == False
 
 
 def test_get_product_info_error():
@@ -363,7 +363,7 @@ def test_get_subscription_id_error():
             mock_cursor.execute.side_effect = psycopg2.Error("Database error")
 
             result = get_subscription_id(1, 1)
-            assert result is None
+            assert result == None
 
 
 def test_insert_into_website_existing_valid():

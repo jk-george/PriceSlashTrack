@@ -44,3 +44,20 @@ variable SUBNET_IDS {
     type = list(string)
     description = " List of Public Subnet IDs "
 }
+
+variable FROM_EMAIL {
+    type = string
+    description = " From Email (our no reply email.) "
+}
+
+
+variable ACCESS_KEY {
+    type = string
+    description = " ACCESS_KEY for AWS"
+}
+
+
+variable SECRET_KEY {
+    type = string
+    description = " SECRET_KEY for AWS"
+}

@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import Mock, patch
 from remove_subscribers import (get_product_ids_from_table, delete_from_table,
-                                delete_unsubscribed_data, main_remove_subscriptions)
+                                delete_unsubscribed_data, main_remove_subscriptions, clean_websites, lambda_handler)
 
 
 @pytest.fixture
@@ -94,7 +94,26 @@ def test_main_remove_subscriptions_valid(mock_get_connection, mock_conn, mock_cu
     mock_cursor.execute.assert_called()
 
 
-def test_delete_from_table(mock_cursor):
+@patch('remove_subscribers.get_connection')
+def test_main_remove_subscriptions_no_unsubscribed(mock_get_connection, mock_conn, mock_cursor):
+    """Tests main_remove_subscriptions when there are no unsubscribed products."""
+    mock_conn.cursor.return_value = mock_cursor
+    mock_get_connection.return_value.__enter__.return_value = mock_conn
+
+    mock_cursor.fetchall.side_effect = [
+        [(1,), (2,)],
+        [(1,), (2,)]]
+
+    main_remove_subscriptions()
+
+    mock_cursor.execute.assert_any_call(
+        "SELECT DISTINCT product_id FROM subscription;")
+    mock_cursor.execute.assert_any_call("SELECT  product_id FROM product;")
+
+    assert mock_cursor.execute.call_count == 2
+
+
+def test_delete_from_table_valid(mock_cursor):
     """Tests delete_from_table constructs and executes correct query with parameters."""
     table_name = "price_changes"
     product_ids = [1, 2, 3]
@@ -106,3 +125,30 @@ def test_delete_from_table(mock_cursor):
 
     mock_cursor.execute.assert_called_once_with(
         expected_query, expected_params)
+
+
+def test_delete_from_price_changes_empty_product_ids(mock_cursor):
+    """Tests delete_from_table with an empty list of product_ids."""
+    table_name = "price_changes"
+    product_ids = []
+
+    expected_query = "DELETE FROM price_changes WHERE product_id = ANY(%s);"
+    expected_params = (product_ids,)
+
+    delete_from_table(mock_cursor, table_name, product_ids)
+
+    mock_cursor.execute.assert_called_once_with(
+        expected_query, expected_params
+    )
+
+
+@patch('remove_subscribers.main_remove_subscriptions', side_effect=Exception("Error"))
+def test_lambda_handler_exception(mock_main_remove_subscriptions):
+    """Tests Lambda handler when an exception is raised."""
+    result = lambda_handler(event={}, context={})
+
+    mock_main_remove_subscriptions.assert_called_once()
+    assert result == {
+        "status_code": 500,
+        "message": "Execution of subscription removal process was not successful."
+    }

@@ -107,6 +107,18 @@ resource "aws_ecs_task_definition" "etl-task-def" {
         {
           name  = "DB_PORT"
           value = var.DB_PORT
+        },
+        {
+          name  = "FROM_EMAIL"
+          value = var.FROM_EMAIL
+        },
+        {
+          name  = "AWS_ACCESS_KEY_ID"
+          value = var.ACCESS_KEY
+        },
+        {
+          name  = "AWS_SECRET_ACCESS_KEY"
+          value = var.SECRET_KEY
         }
       ]
       logConfiguration = {

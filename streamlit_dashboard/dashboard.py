@@ -15,10 +15,10 @@ from database_connection import (get_connection, get_cursor,
 from dashboard_etl import (get_html_from_url, get_website_from_url,
                            scrape_pricing_process, clean_price)
 
+from homepage import home_page
 
-st.set_page_config(
-    layout="wide"
-)
+st.set_page_config(page_title="Price Slashers - Sales Tracker",
+                   page_icon="💸", layout="wide")
 
 header_section = st.container()
 main_section = st.container()
@@ -347,34 +347,46 @@ def track_clicked(user_id, url, notification_price) -> None:
         track_product(user_id, url, notification_price)
 
 
+def show_home_page() -> None:
+    """Displays streamlit home page"""
+    with login_section:
+        with st.sidebar:
+            st.title("Price Slashers Login")
+            page = option_menu(
+                menu_title="", options=["Home Page", "Login Page"])
+        if page == "Home Page":
+            home_page()
+        if page == "Login Page":
+            show_login_page()
+
+
 def show_login_page() -> None:
     """Displays streamlit main page"""
-    with login_section:
-        if st.session_state['logged_in'] == False:
+    if st.session_state['logged_in'] == False:
 
-            # Login to an existing account
+        # Login to an existing account
 
-            st.header("Existing users")
-            email = st.text_input(
-                label="Email address", value="", placeholder="Enter your email address", key="1")
-            password = st.text_input(
-                label="Password", value="", placeholder="Enter password", type="password", key="2")
-            st.button("Login", on_click=login_clicked,
-                      args=(email, password))
+        st.header("Existing users")
+        email = st.text_input(
+            label="Email address", value="", placeholder="Enter your email address", key="1")
+        password = st.text_input(
+            label="Password", value="", placeholder="Enter password", type="password", key="2")
+        st.button("Login", on_click=login_clicked,
+                  args=(email, password))
 
-            # Account creation
+        # Account creation
 
-            st.header("Create an account")
-            first_name = st.text_input(
-                label="First name", placeholder="Enter your first name")
-            last_name = st.text_input(
-                label="Last name", placeholder="Enter your last name")
-            new_email = st.text_input(
-                label="Email address", placeholder="Enter your email address")
-            new_password = st.text_input(
-                label="Password", placeholder="Enter password", type="password")
-            st.button("Create", on_click=create_account_clicked,
-                      args=(first_name, last_name, new_email, new_password))
+        st.header("Create an account")
+        first_name = st.text_input(
+            label="First name", placeholder="Enter your first name")
+        last_name = st.text_input(
+            label="Last name", placeholder="Enter your last name")
+        new_email = st.text_input(
+            label="Email address", placeholder="Enter your email address")
+        new_password = st.text_input(
+            label="Password", placeholder="Enter password", type="password")
+        st.button("Create", on_click=create_account_clicked,
+                  args=(first_name, last_name, new_email, new_password))
 
 
 if __name__ == "__main__":
@@ -383,9 +395,9 @@ if __name__ == "__main__":
 
         if 'logged_in' not in st.session_state:
             st.session_state['logged_in'] = False
-            show_login_page()
+            show_home_page()
         else:
             if st.session_state['logged_in']:
                 show_main_page()
             else:
-                show_login_page()
+                show_home_page()

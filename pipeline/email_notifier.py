@@ -31,7 +31,7 @@ def get_subscriptions_and_products(conn: connection) -> list[tuple[int, float, s
 
     with get_cursor(conn) as cur:
         cur.execute("""
-            SELECT s.product_id, s.notification_price, p.product_name, u.email_address, u.first_name, u.last_name
+            SELECT s.product_id, s.notification_price, p.original_price, p.product_name, u.email_address, u.first_name, u.last_name
             FROM subscription s
             JOIN product p ON s.product_id = p.product_id
             JOIN users u ON s.user_id = u.user_id
@@ -117,7 +117,7 @@ def check_and_notify() -> None:
     with get_connection() as conn:
         subscriptions = get_subscriptions_and_products(conn)
 
-        for product_id, notification_price, product_name, customer_email, first_name, last_name in subscriptions:
+        for product_id, notification_price, original_price, product_name, customer_email, first_name, last_name in subscriptions:
             current_price = get_current_product_price(conn, product_id)
 
             if current_price is None:
@@ -126,7 +126,7 @@ def check_and_notify() -> None:
                 continue
 
             percentage_change = calculate_percentage_decrease(
-                notification_price, current_price)
+                original_price, current_price)
             change_type = determine_if_increase_or_decrease(percentage_change)
 
             if current_price < notification_price:
@@ -161,6 +161,8 @@ def check_and_notify() -> None:
                         "The Price Slashers Team.")
 
                 send_email(customer_email, subject, body)
+
+                log_notification_sent(conn, user_id, product_id, current_price)
 
                 logging.info("Notified %s about price drop for %s.",
                              customer_email, product_name)

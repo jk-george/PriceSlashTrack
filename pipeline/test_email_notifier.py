@@ -110,7 +110,8 @@ def test_check_and_notify_price_drop():
     mock_connection.cursor.return_value = mock_cursor
 
     mock_cursor.fetchall.return_value = [
-        (1, 10.0, "Product A", "user@example.com", "John", "Doe")
+        (1, 10.0, 20.0, "Product A", "user@example.com",
+         "John", "Doe")
     ]
     mock_cursor.fetchone.side_effect = [
         {"price": 5.0},
@@ -129,11 +130,15 @@ def test_check_and_notify_price_drop():
 
         check_and_notify()
 
+    original_price = 20.0
+    current_price = 5.0
+    percentage_change = round(
+        ((original_price - current_price) / original_price) * 100, 1)
     expected_subject = "Price Drop Alert: Product A"
     expected_body = (
         "Dear John Doe,\n\n"
-        "The price for Product A has decreased by 50%!\n"
-        "It is now £5.0, dropping below your threshold of £10.0. "
+        f"The price for Product A has decreased by {percentage_change}%!\n"
+        f"It is now £{current_price}, dropping below your threshold of £10.0. "
         "Hurry before this sale ends!\n"
         "Best wishes and happy shopping,\n"
         "The Price Slashers Team."

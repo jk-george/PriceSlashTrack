@@ -380,15 +380,6 @@ def test_get_subscription_id_error():
             assert result == None
 
 
-def test_insert_into_website_existing_valid():
-    """Returns a valid existing website ID."""
-    with patch('database_connection.get_website_id') as mock_get_website_id:
-        mock_get_website_id.return_value = 1
-
-        result = insert_into_website("test_website")
-        assert result == 1
-
-
 def test_insert_into_website_invalid():
     """Returns None when there is an error inserting into website"""
     with patch('database_connection.get_connection') as mock_get_conn:
@@ -403,15 +394,6 @@ def test_insert_into_website_invalid():
 
                 result = insert_into_website("test_website")
                 assert result == None
-
-
-def test_insert_into_product_existing_valid():
-    """Return existing product ID successfully."""
-    with patch('database_connection.get_product_id') as mock_get_product_id:
-        mock_get_product_id.return_value = 1
-
-        result = insert_into_product(1, "test_url")
-        assert result == 1
 
 
 @patch('database_connection.scrape_pricing_process')

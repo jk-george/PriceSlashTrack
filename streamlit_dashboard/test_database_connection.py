@@ -20,6 +20,13 @@ def test_get_connection_valid():
         assert connection != None
 
 
+@patch("database_connection.os.environ", {
+    "DB_USER": "test_user",
+    "DB_PASSWORD": "test_password",
+    "DB_HOST": "localhost",
+    "DB_PORT": "5432",
+    "DB_NAME": "test_db"
+})
 def test_get_connection_invalid():
     """Returns None when database connection fails."""
     with patch('psycopg2.connect') as mock_connect:

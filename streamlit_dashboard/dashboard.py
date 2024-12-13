@@ -82,7 +82,7 @@ def display_charts(product_id) -> alt.Chart:
                     labelAngle=-45,
                     tickCount=10
                 )),
-        y=alt.Y('Price:Q', title='Price'),
+        y=alt.Y('Price:Q', title='Price / £'),
         tooltip=['Date:T', 'Price:Q']
     ).properties(
         width=500,
@@ -140,19 +140,16 @@ def show_about_page():
     ### 🎯 Dashboard Features:
     - **Current Products**: View the products you are tracking, their current prices, and price trends over time.
     - **Track New Products**: Add a new product URL and set a price threshold to receive notifications about price drops.
-    - **Unsubscribe From Product Tracking**: Manage your tracked products by unsubscribing from the ones you no longer wish to monitor.
 
     ### 🤝 How to Use:
-    1. **Log In or Create an Account**:
-        - If you are a returning user, log in with your email and password.
-        - New users can create an account by providing their details.
-    2. **Track a Product**:
+    1. **Track a Product**:
         - Navigate to **Track New Products**.
         - Enter the product URL and set a notification price.
-    3. **Monitor Your Products**:
+    2. **Monitor Your Products**:
         - Check **Current Products** to view the latest prices and trends.
-    4. **Unsubscribe**:
-        - Use **Unsubscribe From Product Tracking** to stop tracking products.
+        - Click **Unsubscribe** to stop tracking products.
+    3. **Logout**
+        - Click **Logout** to keep your tracked products safe!
 
     We hope this tool makes it easier for you to save money and stay informed about the best deals!
     """)

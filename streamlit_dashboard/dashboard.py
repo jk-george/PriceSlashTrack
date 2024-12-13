@@ -265,7 +265,6 @@ def show_main_page():
     """Displays the main page on the dashboard"""
     with main_section:
         with st.sidebar:
-            st.logo("logo.png", size='large')
             st.title("Price Slasher Sales Tracker")
             page = option_menu(
                 menu_title="", options=["About", "Current products", "Track new products"], icons=["question-circle", "bag", "plus-lg"])

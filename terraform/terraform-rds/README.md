@@ -15,7 +15,7 @@ AWS_ACCESS_KEY_ID = "your-aws-access-key"
 AWS_SECRET_ACCESS_KEY = "your-aws-secret-key"
 
 # RDS Database Config
-DB_USERNAME = "the-rds-username" # this is not standard across the files - in the ETL iterator main.tf, it's DB_USER, in this folder's main.tf, it's DB_USERNAME - make this standard!
+DB_USER = "the-rds-username"
 DB_PASSWORD = "the-rds-password"
 ```
 

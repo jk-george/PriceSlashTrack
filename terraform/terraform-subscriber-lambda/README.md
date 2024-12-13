@@ -11,7 +11,7 @@ Please read the README located in the top-level Terraform folder for detailed in
 1. Create a `terraform.tfvars` file and fill it with the following variables:
 ```bash
 # RDS Database Config
-DB_USER = "the-rds-username" # again, this is not standard across the files - FIX!
+DB_USER = "the-rds-username"
 DB_NAME = "the-rds-name"
 DB_PASSWORD = "the-rds-password"
 ```

@@ -1,4 +1,5 @@
-# 🛍️ It's on Sale Tracker
+# 📉 PriceSlashers - Sales Tracker
+![PriceSlashers Logo](https://github.com/jk-george/PriceSlashTrack/blob/main/diagrams/logo.png)
 
 ## ❓ Problem Statement 
 

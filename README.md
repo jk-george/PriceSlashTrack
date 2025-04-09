@@ -1,6 +1,3 @@
-
-![PriceSlashers Logo](https://github.com/jk-george/PriceSlashTrack/blob/main/diagrams/logo.png)
-
 # 📉 PriceSlashers - Sales Tracker
 
 ## ❓ Problem Statement 
